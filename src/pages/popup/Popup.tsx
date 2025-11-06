@@ -6,7 +6,7 @@ import { baseTrainingData } from "@src/constants";
 import { TrainingVisualizer } from "@src/components/TrainingVisualizer";
 
 export default function Popup() {
-  const [token, setToken] = useState<string | null>(null);
+  const [csrfToken, setToken] = useState<string | null>(null);
   const [status, setStatus] = useState({ message: "", type: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [showVisualizer, setShowVisualizer] = useState(false);
@@ -35,8 +35,8 @@ export default function Popup() {
             type: "error",
           });
           console.error(chrome.runtime.lastError.message);
-        } else if (response && response.token) {
-          setToken(response.token);
+        } else if (response && response.csrfToken) {
+          setToken(response.csrfToken);
         } else {
           setStatus({
             message:
@@ -49,7 +49,7 @@ export default function Popup() {
   }, []);
 
   const importTraining = () => {
-    if (!token) {
+    if (!csrfToken) {
       setStatus({
         message:
           "Authentication token not found. Please ensure you are on a Garmin Connect workout page and refresh.",
@@ -98,7 +98,7 @@ export default function Popup() {
           {
             action: "editTraining",
             data: {
-              token,
+              csrfToken,
               trainingId,
               trainingData,
             },
@@ -129,7 +129,7 @@ export default function Popup() {
     } catch (error) {
       setIsLoading(false);
       setStatus({
-        message: `Error parsing training data: ${(error as any).message}`,
+        message: `Error parsing training data: ${(error as Error).message}`,
         type: "error",
       });
       console.error("Parsing error:", error);
@@ -172,7 +172,7 @@ export default function Popup() {
         <button
           type="button"
           onClick={importTraining}
-          disabled={isLoading || !token}
+          disabled={isLoading || !csrfToken}
           className="w-full h-12 px-6 text-white font-medium bg-teal-500 rounded-lg
                      hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500
                      disabled:cursor-not-allowed

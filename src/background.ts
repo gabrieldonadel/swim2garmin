@@ -2,7 +2,7 @@ chrome.runtime.onMessage.addListener(
   (
     request: {
       action: string;
-      data: { token: string; trainingId: string; trainingData: any };
+      data: { csrfToken: string; trainingId: string; trainingData: any };
     },
     sender: chrome.runtime.MessageSender,
     sendResponse: (response: {
@@ -12,17 +12,17 @@ chrome.runtime.onMessage.addListener(
     }) => void
   ) => {
     if (request.action === "editTraining") {
-      const { token, trainingId, trainingData } = request.data;
+      const { csrfToken, trainingId, trainingData } = request.data;
 
       fetch(
-        `https://connect.garmin.com/workout-service/workout/${trainingId}`,
+        `https://connect.garmin.com/gc-api/workout-service/workout/${trainingId}`,
         {
           headers: {
-            accept: "application/json, text/plain, */*",
-            authorization: `Bearer ${token}`,
+            accept: "*/*",
             "content-type": "application/json;charset=UTF-8",
-            "di-backend": "connectapi.garmin.com",
+            "connect-csrf-token": csrfToken,
           },
+          credentials: "include",
           body: JSON.stringify(trainingData),
           method: "PUT",
         }
