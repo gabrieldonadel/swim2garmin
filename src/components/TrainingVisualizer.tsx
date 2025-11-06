@@ -17,6 +17,9 @@ export const TrainingVisualizer = ({ trainingText }: Props) => {
       <h2 className="text-lg font-medium text-gray-800 mb-4">
         Training Preview
       </h2>
+      {data.workoutSegments?.length ? (
+        <p>Total distance: {data.estimatedDistanceInMeters}</p>
+      ) : null}
       {data.workoutSegments.map((segment, index) => (
         <div key={segment.segmentOrder}>
           {segment.workoutSteps.map((step) => (

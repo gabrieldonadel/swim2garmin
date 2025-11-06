@@ -30,6 +30,7 @@ export interface WorkoutSegment {
 export interface TrainingData {
   sportType: { [key: string]: any };
   workoutSegments: WorkoutSegment[];
+  estimatedDistanceInMeters: number;
 }
 
 export type EndCondition = {

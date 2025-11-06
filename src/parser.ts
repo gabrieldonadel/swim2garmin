@@ -44,6 +44,7 @@ export const restStepType = {
 
 export function parseTrainingText(text: string): TrainingData {
   const lines = text.split("\n").filter((line) => line.trim() !== "");
+  let totalDistance = 0;
   const workoutSteps: WorkoutStep[] = [];
   let stepOrder = 1;
 
@@ -71,6 +72,8 @@ export function parseTrainingText(text: string): TrainingData {
         distance = 0;
       }
     }
+
+    totalDistance += distance * repetitions;
 
     // "com" represents rest in seconds
     const restMatch = description.match(/com (\d+)"/);
@@ -140,5 +143,6 @@ export function parseTrainingText(text: string): TrainingData {
         workoutSteps: workoutSteps,
       },
     ],
+    estimatedDistanceInMeters: totalDistance,
   };
 }
