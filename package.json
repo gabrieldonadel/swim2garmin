@@ -1,6 +1,6 @@
 {
   "name": "swim2garmin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Imports Swimming training data to Garmin Connect.",
   "scripts": {
     "build": "vite build --config vite.config.chrome.ts",
