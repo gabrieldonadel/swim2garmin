@@ -2,7 +2,6 @@ import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
-  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -321,13 +320,7 @@ export default function Index() {
           </Text>
         )}
         {message?.workoutId && (
-          <Pressable
-            onPress={() =>
-              Linking.openURL(
-                `https://connect.garmin.com/modern/workout/${message.workoutId}`,
-              )
-            }
-          >
+          <Pressable onPress={() => accounts.openGarminWorkout(message.workoutId!)}>
             <Text style={styles.workoutLink}>
               Ver treino no Garmin Connect →
             </Text>

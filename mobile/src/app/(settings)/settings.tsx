@@ -1,6 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useAccounts } from "@/components/accounts-context";
+
+const REPO_URL = "https://github.com/gabrieldonadel/swim2garmin";
 
 const STATUS_LABEL = {
   loading: "Verificando…",
@@ -58,6 +60,15 @@ export default function Settings() {
         onLogin={accounts.tpLogin}
         onLogout={accounts.tpLogout}
       />
+
+      <Text style={styles.sectionTitle}>Sobre</Text>
+      <Pressable style={styles.row} onPress={() => Linking.openURL(REPO_URL)}>
+        <View style={styles.rowInfo}>
+          <Text style={styles.rowName}>Código-fonte</Text>
+          <Text style={styles.rowStatus}>github.com/gabrieldonadel/swim2garmin</Text>
+        </View>
+        <Text style={styles.chevron}>→</Text>
+      </Pressable>
     </View>
   );
 }
@@ -114,6 +125,11 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: "#dc2626",
+    fontWeight: "600",
+  },
+  chevron: {
+    color: "#9ca3af",
+    fontSize: 18,
     fontWeight: "600",
   },
 });

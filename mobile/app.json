@@ -8,7 +8,11 @@
     "scheme": "swim2garmin",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.gabrieldonadel.swim2garmin",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -44,6 +48,12 @@
         "projectId": "8b575b01-2e02-4f8b-844f-b32c4b917789"
       }
     },
-    "owner": "gabrieldonadel"
+    "owner": "gabrieldonadel",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/8b575b01-2e02-4f8b-844f-b32c4b917789"
+    }
   }
 }

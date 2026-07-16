@@ -22,6 +22,7 @@ interface Accounts {
   tpLogout(): void;
   sendWorkout(payload: object, scheduleDate: string | undefined, onResult: (r: SendResult) => void): void;
   fetchWeek(startDay: string, endDay: string, onWeek: (r: WeekResult) => void): void;
+  openGarminWorkout(workoutId: number): void;
 }
 
 const AccountsContext = createContext<Accounts | null>(null);
@@ -56,6 +57,12 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
     fetchWeek: (startDay, endDay, callback) => {
       onWeek.current = callback;
       tp.current?.fetchWeek(startDay, endDay);
+    },
+    // Garmin's iOS app doesn't register workout pages as universal links
+    // (checked connect.garmin.com AASA), so a deep link is impossible —
+    // show the page in our own logged-in WebView instead.
+    openGarminWorkout: (workoutId) => {
+      garmin.current?.openPage(`https://connect.garmin.com/modern/workout/${workoutId}`);
     },
   };
 

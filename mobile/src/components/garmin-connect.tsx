@@ -20,6 +20,8 @@ export interface GarminConnectHandle {
   sendWorkout(payload: object, scheduleDate?: string): void;
   showLogin(): void;
   logout(): void;
+  /** opens a connect.garmin.com page in the (already authenticated) overlay */
+  openPage(url: string): void;
 }
 
 interface Props {
@@ -131,6 +133,12 @@ export const GarminConnect = forwardRef<GarminConnectHandle, Props>(
           "window.location.href = 'https://connect.garmin.com/modern/auth/logout'; true;"
         );
       },
+      openPage(url) {
+        setVisible(true);
+        webview.current?.injectJavaScript(
+          `window.location.href = ${JSON.stringify(url)}; true;`
+        );
+      },
     }));
 
     const handleMessage = (raw: string) => {
@@ -167,7 +175,7 @@ export const GarminConnect = forwardRef<GarminConnectHandle, Props>(
       >
         {visible && (
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>Entrar no Garmin Connect</Text>
+            <Text style={styles.headerTitle}>Garmin Connect</Text>
             <Pressable onPress={() => setVisible(false)} hitSlop={12}>
               <Text style={styles.close}>Fechar</Text>
             </Pressable>
