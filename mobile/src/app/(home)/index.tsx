@@ -1,7 +1,8 @@
 import { DateTimePicker } from "@expo/ui/community/datetime-picker";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -13,17 +14,10 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import {
-  GarminConnect,
-  type GarminConnectHandle,
-  type GarminStatus,
-  type SendResult,
-} from "@/components/garmin-connect";
+import { useAccounts } from "@/components/accounts-context";
+import { type SendResult } from "@/components/garmin-connect";
 import { TrainingPreview } from "@/components/training-preview";
 import {
-  TrainingPeaksConnect,
-  type TrainingPeaksConnectHandle,
-  type TrainingPeaksStatus,
   type TpWorkout,
   type WeekResult,
 } from "@/components/trainingpeaks-connect";
@@ -32,7 +26,7 @@ import { parseTrainingText } from "@/lib/parser";
 
 const toIsoDay = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
-    date.getDate()
+    date.getDate(),
   ).padStart(2, "0")}`;
 
 // The Android Material date picker reports the picked day as midnight UTC,
@@ -43,8 +37,16 @@ const utcDayToLocal = (date: Date) =>
 // Monday–Sunday of the current week
 const weekRange = () => {
   const now = new Date();
-  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
-  const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
+  const monday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - ((now.getDay() + 6) % 7),
+  );
+  const sunday = new Date(
+    monday.getFullYear(),
+    monday.getMonth(),
+    monday.getDate() + 6,
+  );
   return { start: toIsoDay(monday), end: toIsoDay(sunday) };
 };
 
@@ -59,17 +61,18 @@ const dayLabel = (isoDay: string) => {
 
 export default function Index() {
   const insets = useSafeAreaInsets();
-  const garmin = useRef<GarminConnectHandle>(null);
+  const accounts = useAccounts();
   const [text, setText] = useState("");
-  const [status, setStatus] = useState<GarminStatus>("loading");
   const [sending, setSending] = useState(false);
-  const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
+  const [message, setMessage] = useState<{
+    text: string;
+    error: boolean;
+    workoutId?: number;
+  } | null>(null);
   const [scheduling, setScheduling] = useState(false);
   const [scheduleDate, setScheduleDate] = useState(new Date());
   const [pickerOpen, setPickerOpen] = useState(false);
-  const tp = useRef<TrainingPeaksConnectHandle>(null);
   const tpFetchPending = useRef(false);
-  const [tpStatus, setTpStatus] = useState<TrainingPeaksStatus>("loading");
   const [tpLoading, setTpLoading] = useState(false);
   const [tpWorkouts, setTpWorkouts] = useState<TpWorkout[] | null>(null);
 
@@ -82,43 +85,57 @@ export default function Index() {
     return data.estimatedDistanceInMeters > 0 ? data : null;
   }, [text]);
 
+  const handleResult = (result: SendResult) => {
+    setSending(false);
+    if (result.ok) {
+      if (result.scheduled === true) {
+        setMessage({
+          text: `Treino criado e agendado para ${scheduleDate.toLocaleDateString("pt-BR")} ✓`,
+          error: false,
+          workoutId: result.workoutId,
+        });
+      } else if (result.scheduled === false) {
+        setMessage({
+          text: `Treino criado, mas o agendamento falhou: ${result.scheduleBody}`,
+          error: true,
+          workoutId: result.workoutId,
+        });
+      } else {
+        setMessage({
+          text: "Treino criado no Garmin Connect ✓",
+          error: false,
+          workoutId: result.workoutId,
+        });
+      }
+    } else if (result.status === 401 || result.status === 403) {
+      setMessage({
+        text: "Sessão expirada — entre no Garmin novamente.",
+        error: true,
+      });
+      accounts.garminLogin();
+    } else {
+      setMessage({
+        text: `Falhou (${result.status}): ${result.body}`,
+        error: true,
+      });
+    }
+  };
+
   const send = () => {
     if (!parsed) {
       return;
     }
     setSending(true);
     setMessage(null);
-    garmin.current?.sendWorkout(
+    accounts.sendWorkout(
       {
         ...baseTrainingData,
         ...parsed,
         workoutName: `Swim2Garmin ${parsed.estimatedDistanceInMeters}m`,
       },
-      scheduling ? toIsoDay(scheduleDate) : undefined
+      scheduling ? toIsoDay(scheduleDate) : undefined,
+      handleResult,
     );
-  };
-
-  const fetchWeek = () => {
-    setMessage(null);
-    if (tpStatus !== "ready") {
-      tpFetchPending.current = true;
-      tp.current?.showLogin();
-      return;
-    }
-    setTpLoading(true);
-    setTpWorkouts(null);
-    const { start, end } = weekRange();
-    tp.current?.fetchWeek(start, end);
-  };
-
-  const handleTpStatus = (status: TrainingPeaksStatus) => {
-    setTpStatus(status);
-    if (status === "ready" && tpFetchPending.current) {
-      tpFetchPending.current = false;
-      setTpLoading(true);
-      const { start, end } = weekRange();
-      tp.current?.fetchWeek(start, end);
-    }
   };
 
   const handleWeek = (result: WeekResult) => {
@@ -126,11 +143,38 @@ export default function Index() {
     if (!result.ok) {
       setMessage({ text: `TrainingPeaks: ${result.error}`, error: true });
     } else if (!result.workouts?.length) {
-      setMessage({ text: "Nenhum treino de natação nesta semana.", error: false });
+      setMessage({
+        text: "Nenhum treino de natação nesta semana.",
+        error: false,
+      });
     } else {
       setTpWorkouts(result.workouts);
     }
   };
+
+  const fetchWeek = () => {
+    setMessage(null);
+    if (accounts.tpStatus !== "ready") {
+      tpFetchPending.current = true;
+      accounts.tpLogin();
+      return;
+    }
+    setTpLoading(true);
+    setTpWorkouts(null);
+    const { start, end } = weekRange();
+    accounts.fetchWeek(start, end, handleWeek);
+  };
+
+  // resume a pending fetch right after the TrainingPeaks login completes
+  useEffect(() => {
+    if (accounts.tpStatus === "ready" && tpFetchPending.current) {
+      tpFetchPending.current = false;
+      setTpLoading(true);
+      const { start, end } = weekRange();
+      accounts.fetchWeek(start, end, handleWeek);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accounts.tpStatus]);
 
   const pickWorkout = (workout: TpWorkout) => {
     setText(workout.description);
@@ -146,30 +190,6 @@ export default function Index() {
     }
   };
 
-  const handleResult = (result: SendResult) => {
-    setSending(false);
-    if (result.ok) {
-      if (result.scheduled === true) {
-        setMessage({
-          text: `Treino criado e agendado para ${scheduleDate.toLocaleDateString("pt-BR")} ✓`,
-          error: false,
-        });
-      } else if (result.scheduled === false) {
-        setMessage({
-          text: `Treino criado, mas o agendamento falhou: ${result.scheduleBody}`,
-          error: true,
-        });
-      } else {
-        setMessage({ text: "Treino criado no Garmin Connect ✓", error: false });
-      }
-    } else if (result.status === 401 || result.status === 403) {
-      setMessage({ text: "Sessão expirada — entre no Garmin novamente.", error: true });
-      setStatus("login");
-    } else {
-      setMessage({ text: `Falhou (${result.status}): ${result.body}`, error: true });
-    }
-  };
-
   return (
     <KeyboardAvoidingView
       style={styles.flex}
@@ -177,12 +197,21 @@ export default function Index() {
     >
       <ScrollView
         style={styles.flex}
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 16 }]}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: insets.bottom + 16 },
+        ]}
         keyboardShouldPersistTaps="handled"
       >
-        <Pressable style={styles.tpButton} disabled={tpLoading} onPress={fetchWeek}>
+        <Pressable
+          style={styles.tpButton}
+          disabled={tpLoading}
+          onPress={fetchWeek}
+        >
           <Text style={styles.tpButtonText}>
-            {tpLoading ? "Buscando…" : "Buscar treinos da semana no TrainingPeaks"}
+            {tpLoading
+              ? "Buscando…"
+              : "Buscar treinos da semana no TrainingPeaks"}
           </Text>
         </Pressable>
 
@@ -206,7 +235,9 @@ export default function Index() {
         <TextInput
           style={styles.input}
           multiline
-          placeholder={'Cole seu treino de natação aqui…\n\n200m A1 livre com 20"\n4x50m técnica com 15"'}
+          placeholder={
+            'Cole seu treino de natação aqui…\n\n200m A1 livre com 20"\n4x50m técnica com 15"'
+          }
           value={text}
           onChangeText={(value) => {
             setText(value);
@@ -227,10 +258,13 @@ export default function Index() {
                 locale="pt_BR"
                 minimumDate={new Date()}
                 onValueChange={(_, date) => setScheduleDate(date)}
+                style={styles.iosDatePicker}
               />
             ) : (
               <Pressable onPress={() => setPickerOpen(true)}>
-                <Text style={styles.scheduleDate}>{scheduleDate.toLocaleDateString("pt-BR")}</Text>
+                <Text style={styles.scheduleDate}>
+                  {scheduleDate.toLocaleDateString("pt-BR")}
+                </Text>
               </Pressable>
             ))}
           <Switch value={scheduling} onValueChange={setScheduling} />
@@ -250,8 +284,8 @@ export default function Index() {
           />
         )}
 
-        {status === "login" && (
-          <Pressable style={styles.loginBanner} onPress={() => garmin.current?.showLogin()}>
+        {accounts.garminStatus === "login" && (
+          <Pressable style={styles.loginBanner} onPress={accounts.garminLogin}>
             <Text style={styles.loginBannerText}>
               Não conectado ao Garmin Connect — toque para entrar
             </Text>
@@ -259,30 +293,49 @@ export default function Index() {
         )}
 
         <Pressable
-          style={[styles.button, (!parsed || status !== "ready" || sending) && styles.buttonDisabled]}
-          disabled={!parsed || status !== "ready" || sending}
+          style={[
+            styles.button,
+            (!parsed || accounts.garminStatus !== "ready" || sending) &&
+              styles.buttonDisabled,
+          ]}
+          disabled={!parsed || accounts.garminStatus !== "ready" || sending}
           onPress={send}
         >
           <Text style={styles.buttonText}>
             {sending
               ? "Enviando…"
-              : status === "loading"
+              : accounts.garminStatus === "loading"
                 ? "Conectando ao Garmin…"
                 : "Enviar para o Garmin"}
           </Text>
         </Pressable>
 
         {message && (
-          <Text style={[styles.message, message.error ? styles.error : styles.success]}>
+          <Text
+            style={[
+              styles.message,
+              message.error ? styles.error : styles.success,
+            ]}
+          >
             {message.text}
           </Text>
+        )}
+        {message?.workoutId && (
+          <Pressable
+            onPress={() =>
+              Linking.openURL(
+                `https://connect.garmin.com/modern/workout/${message.workoutId}`,
+              )
+            }
+          >
+            <Text style={styles.workoutLink}>
+              Ver treino no Garmin Connect →
+            </Text>
+          </Pressable>
         )}
 
         {parsed && <TrainingPreview data={parsed} />}
       </ScrollView>
-
-      <GarminConnect ref={garmin} onStatus={setStatus} onResult={handleResult} />
-      <TrainingPeaksConnect ref={tp} onStatus={handleTpStatus} onWeek={handleWeek} />
     </KeyboardAvoidingView>
   );
 }
@@ -351,6 +404,11 @@ const styles = StyleSheet.create({
     color: "#0d9488",
     fontWeight: "600",
   },
+  // the SwiftUI Host only self-sizes vertically — without an explicit width
+  // it stretches under the Switch and never receives taps
+  iosDatePicker: {
+    width: 150,
+  },
   loginBanner: {
     backgroundColor: "#fef3c7",
     borderRadius: 10,
@@ -384,6 +442,12 @@ const styles = StyleSheet.create({
   success: {
     backgroundColor: "#d1fae5",
     color: "#065f46",
+  },
+  workoutLink: {
+    color: "#0d9488",
+    fontWeight: "600",
+    textAlign: "center",
+    textDecorationLine: "underline",
   },
   error: {
     backgroundColor: "#fee2e2",

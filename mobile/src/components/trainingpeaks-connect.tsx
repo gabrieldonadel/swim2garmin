@@ -1,5 +1,6 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 
 export type TrainingPeaksStatus = "loading" | "login" | "ready";
@@ -20,6 +21,7 @@ export interface WeekResult {
 export interface TrainingPeaksConnectHandle {
   fetchWeek(startDay: string, endDay: string): void;
   showLogin(): void;
+  logout(): void;
 }
 
 interface Props {
@@ -101,6 +103,7 @@ export const TrainingPeaksConnect = forwardRef<TrainingPeaksConnectHandle, Props
   ({ onStatus, onWeek }, ref) => {
     const webview = useRef<WebView>(null);
     const [visible, setVisible] = useState(false);
+    const insets = useSafeAreaInsets();
 
     useImperativeHandle(ref, () => ({
       fetchWeek(startDay, endDay) {
@@ -109,6 +112,11 @@ export const TrainingPeaksConnect = forwardRef<TrainingPeaksConnectHandle, Props
       showLogin() {
         setVisible(true);
         webview.current?.reload();
+      },
+      logout() {
+        webview.current?.injectJavaScript(
+          "window.location.href = 'https://home.trainingpeaks.com/logout'; true;"
+        );
       },
     }));
 
@@ -133,7 +141,11 @@ export const TrainingPeaksConnect = forwardRef<TrainingPeaksConnectHandle, Props
 
     return (
       <View
-        style={visible ? styles.fullscreen : styles.hidden}
+        style={
+          visible
+            ? [styles.fullscreen, { paddingTop: insets.top, paddingBottom: insets.bottom }]
+            : styles.hidden
+        }
         pointerEvents={visible ? "auto" : "none"}
       >
         {visible && (
