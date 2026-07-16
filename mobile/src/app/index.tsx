@@ -20,6 +20,13 @@ import {
   type SendResult,
 } from "@/components/garmin-connect";
 import { TrainingPreview } from "@/components/training-preview";
+import {
+  TrainingPeaksConnect,
+  type TrainingPeaksConnectHandle,
+  type TrainingPeaksStatus,
+  type TpWorkout,
+  type WeekResult,
+} from "@/components/trainingpeaks-connect";
 import { baseTrainingData } from "@/lib/constants";
 import { parseTrainingText } from "@/lib/parser";
 
@@ -33,6 +40,23 @@ const toIsoDay = (date: Date) =>
 const utcDayToLocal = (date: Date) =>
   new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
 
+// Monday–Sunday of the current week
+const weekRange = () => {
+  const now = new Date();
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
+  const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
+  return { start: toIsoDay(monday), end: toIsoDay(sunday) };
+};
+
+const dayLabel = (isoDay: string) => {
+  const [year, month, day] = isoDay.split("-").map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString("pt-BR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  });
+};
+
 export default function Index() {
   const insets = useSafeAreaInsets();
   const garmin = useRef<GarminConnectHandle>(null);
@@ -43,6 +67,11 @@ export default function Index() {
   const [scheduling, setScheduling] = useState(false);
   const [scheduleDate, setScheduleDate] = useState(new Date());
   const [pickerOpen, setPickerOpen] = useState(false);
+  const tp = useRef<TrainingPeaksConnectHandle>(null);
+  const tpFetchPending = useRef(false);
+  const [tpStatus, setTpStatus] = useState<TrainingPeaksStatus>("loading");
+  const [tpLoading, setTpLoading] = useState(false);
+  const [tpWorkouts, setTpWorkouts] = useState<TpWorkout[] | null>(null);
 
   const parsed = useMemo(() => {
     const trimmed = text.trim();
@@ -67,6 +96,54 @@ export default function Index() {
       },
       scheduling ? toIsoDay(scheduleDate) : undefined
     );
+  };
+
+  const fetchWeek = () => {
+    setMessage(null);
+    if (tpStatus !== "ready") {
+      tpFetchPending.current = true;
+      tp.current?.showLogin();
+      return;
+    }
+    setTpLoading(true);
+    setTpWorkouts(null);
+    const { start, end } = weekRange();
+    tp.current?.fetchWeek(start, end);
+  };
+
+  const handleTpStatus = (status: TrainingPeaksStatus) => {
+    setTpStatus(status);
+    if (status === "ready" && tpFetchPending.current) {
+      tpFetchPending.current = false;
+      setTpLoading(true);
+      const { start, end } = weekRange();
+      tp.current?.fetchWeek(start, end);
+    }
+  };
+
+  const handleWeek = (result: WeekResult) => {
+    setTpLoading(false);
+    if (!result.ok) {
+      setMessage({ text: `TrainingPeaks: ${result.error}`, error: true });
+    } else if (!result.workouts?.length) {
+      setMessage({ text: "Nenhum treino de natação nesta semana.", error: false });
+    } else {
+      setTpWorkouts(result.workouts);
+    }
+  };
+
+  const pickWorkout = (workout: TpWorkout) => {
+    setText(workout.description);
+    setTpWorkouts(null);
+    setMessage(null);
+    const [year, month, day] = workout.day.split("-").map(Number);
+    const workoutDay = new Date(year, month - 1, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (workoutDay.getTime() >= today.getTime()) {
+      setScheduling(true);
+      setScheduleDate(workoutDay);
+    }
   };
 
   const handleResult = (result: SendResult) => {
@@ -103,6 +180,29 @@ export default function Index() {
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 16 }]}
         keyboardShouldPersistTaps="handled"
       >
+        <Pressable style={styles.tpButton} disabled={tpLoading} onPress={fetchWeek}>
+          <Text style={styles.tpButtonText}>
+            {tpLoading ? "Buscando…" : "Buscar treinos da semana no TrainingPeaks"}
+          </Text>
+        </Pressable>
+
+        {tpWorkouts && (
+          <View style={styles.tpList}>
+            {tpWorkouts.map((workout, index) => (
+              <Pressable
+                key={workout.day + index}
+                style={styles.tpItem}
+                onPress={() => pickWorkout(workout)}
+              >
+                <Text style={styles.tpItemDay}>{dayLabel(workout.day)}</Text>
+                <Text style={styles.tpItemInfo}>
+                  {workout.title} · {workout.distance}m
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
+
         <TextInput
           style={styles.input}
           multiline
@@ -182,6 +282,7 @@ export default function Index() {
       </ScrollView>
 
       <GarminConnect ref={garmin} onStatus={setStatus} onResult={handleResult} />
+      <TrainingPeaksConnect ref={tp} onStatus={handleTpStatus} onWeek={handleWeek} />
     </KeyboardAvoidingView>
   );
 }
@@ -194,6 +295,38 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
     gap: 12,
+  },
+  tpButton: {
+    borderWidth: 1,
+    borderColor: "#0d9488",
+    borderRadius: 10,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tpButtonText: {
+    color: "#0d9488",
+    fontWeight: "600",
+  },
+  tpList: {
+    gap: 8,
+  },
+  tpItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: "#f0fdfa",
+    borderRadius: 10,
+    padding: 12,
+  },
+  tpItemDay: {
+    fontWeight: "700",
+    color: "#0d9488",
+    textTransform: "capitalize",
+  },
+  tpItemInfo: {
+    flex: 1,
+    color: "#333",
   },
   input: {
     minHeight: 180,
