@@ -1,6 +1,7 @@
 import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -22,6 +23,15 @@ import {
 } from "@/components/trainingpeaks-connect";
 import { baseTrainingData } from "@/lib/constants";
 import { parseTrainingText } from "@/lib/parser";
+import { type PoolLength } from "@/lib/use-pool-length";
+import { type TrainingData } from "@/lib/types";
+
+// distances of every executable step (repeat groups are flattened one level)
+const stepDistances = (data: TrainingData): number[] =>
+  data.workoutSegments[0].workoutSteps
+    .flatMap((step) => step.workoutSteps ?? [step])
+    .filter((step) => step.endCondition.conditionTypeKey === "distance")
+    .map((step) => step.endConditionValue ?? 0);
 
 const toIsoDay = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
@@ -120,7 +130,7 @@ export default function Index() {
     }
   };
 
-  const send = () => {
+  const dispatchSend = (poolLength: PoolLength) => {
     if (!parsed) {
       return;
     }
@@ -130,11 +140,36 @@ export default function Index() {
       {
         ...baseTrainingData,
         ...parsed,
+        poolLength,
         workoutName: `Swim2Garmin ${parsed.estimatedDistanceInMeters}m`,
       },
       scheduling ? toIsoDay(scheduleDate) : undefined,
       handleResult,
     );
+  };
+
+  const send = () => {
+    if (!parsed) {
+      return;
+    }
+    // A 25m/75m step can't be swum in a 50m pool (the watch counts whole
+    // lengths), so warn before sending an incompatible pool length.
+    const incompatible =
+      accounts.poolLength === 50 &&
+      stepDistances(parsed).some((distance) => distance % 50 !== 0);
+    if (incompatible) {
+      Alert.alert(
+        "Distâncias incompatíveis",
+        "Este treino tem distâncias que não cabem numa piscina de 50m (ex.: 25m, 75m). Numa piscina de 50m o relógio só conta voltas completas.",
+        [
+          { text: "Trocar para 25m", onPress: () => { accounts.setPoolLength(25); dispatchSend(25); } },
+          { text: "Enviar mesmo assim", onPress: () => dispatchSend(50) },
+          { text: "Cancelar", style: "cancel" },
+        ],
+      );
+      return;
+    }
+    dispatchSend(accounts.poolLength);
   };
 
   const handleWeek = (result: WeekResult) => {

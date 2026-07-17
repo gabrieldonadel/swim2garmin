@@ -15,7 +15,7 @@ export const SportTypes: Record<
 
 // Base payload for creating a workout. Trimmed from the extension's PUT
 // payload: no workoutId/ownerId/dates — the server fills those on create.
-// ponytail: pool length fixed at 25m, make it a setting if 50m pools show up
+// poolLength is a default; the screen overrides it from the user's setting.
 export const baseTrainingData = {
   workoutName: "Swim2Garmin",
   description: null,

@@ -61,6 +61,27 @@ export default function Settings() {
         onLogout={accounts.tpLogout}
       />
 
+      <Text style={styles.sectionTitle}>Piscina</Text>
+      <View style={styles.row}>
+        <Text style={[styles.rowName, styles.rowInfo]}>Comprimento</Text>
+        <View style={styles.segmented}>
+          {([25, 50] as const).map((length) => {
+            const selected = accounts.poolLength === length;
+            return (
+              <Pressable
+                key={length}
+                style={[styles.segment, selected && styles.segmentSelected]}
+                onPress={() => accounts.setPoolLength(length)}
+              >
+                <Text style={[styles.segmentText, selected && styles.segmentTextSelected]}>
+                  {length}m
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+
       <Text style={styles.sectionTitle}>Sobre</Text>
       <Pressable style={styles.row} onPress={() => Linking.openURL(REPO_URL)}>
         <View style={styles.rowInfo}>
@@ -131,5 +152,26 @@ const styles = StyleSheet.create({
     color: "#9ca3af",
     fontSize: 18,
     fontWeight: "600",
+  },
+  segmented: {
+    flexDirection: "row",
+    borderWidth: 1,
+    borderColor: "#0d9488",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  segment: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  segmentSelected: {
+    backgroundColor: "#0d9488",
+  },
+  segmentText: {
+    color: "#0d9488",
+    fontWeight: "600",
+  },
+  segmentTextSelected: {
+    color: "#fff",
   },
 });
