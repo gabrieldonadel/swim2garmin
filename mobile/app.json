@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "Swim2Garmin",
+    "slug": "swim2garmin",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/app-icon.png",
+    "scheme": "swim2garmin",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.gabrieldonadel.swim2garmin",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff",
+        "foregroundImage": "./assets/images/s2g-android-foreground.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.gabrieldonadel.swim2garmin"
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#ffffff",
+          "image": "./assets/images/splash-logo.png",
+          "imageWidth": 200
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8b575b01-2e02-4f8b-844f-b32c4b917789"
+      }
+    },
+    "owner": "gabrieldonadel",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/8b575b01-2e02-4f8b-844f-b32c4b917789"
+    }
+  }
+}
