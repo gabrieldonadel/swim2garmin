@@ -65,10 +65,20 @@ habilitado.
 
 ## Origem
 
-Implementa `Swim2Garmin Landing.dc.html` do projeto do Claude Design. A demo
-do app no hero é uma reescrita em JavaScript puro da máquina de estados que,
-no design, era um componente `DCLogic` com blocos `sc-if`/`sc-for`.
+Implementa `Swim2Garmin Landing.dc.html` do projeto do Claude Design.
 
-Os dados dos treinos de exemplo ficam nos atributos `data-*` dos botões
-`.wk-item` em `index.html`, que são a única fonte da verdade — o
-`app-demo.js` lê de lá.
+A demo no hero reproduz a tela real do app. Os valores dentro de `.app`
+(espaçamentos, cores, tamanhos de fonte) são pontos de iOS copiados de
+`mobile/src/app/(home)/index.tsx` e `mobile/src/app/(home)/_layout.tsx`;
+o `.app` inteiro é escalado para a largura interna da moldura por
+`--app-scale`, então dá para comparar os dois lado a lado. O logo é o
+mesmo `mobile/assets/images/rounded-logo.png`.
+
+O `app-demo.js` espelha o estado que a tela real mantém (`text`,
+`tpWorkouts`, `scheduling`, `scheduleDate`, `message`) e as transições
+entre eles: buscar mostra a lista, escolher um treino preenche o texto,
+esconde a lista e liga o agendamento, e o botão de enviar fica
+desabilitado enquanto não há treino.
+
+Os treinos de exemplo ficam nos atributos `data-*` dos botões `.tp-item`
+em `index.html`, que são a única fonte da verdade.

@@ -32,6 +32,10 @@
   --s2g-syn-reps: #6fcba4;
 
   --s2g-measure: 1200px;
+
+  /* Real app palette, from mobile/src/app/(home)/index.tsx */
+  --app-teal: #0d9488;
+  --app-teal-bg: #f0fdfa;
 }
 
 /* Page-level overrides from the design's own <style> block ---- */
@@ -54,6 +58,12 @@ a:hover {
   outline: 2px solid var(--s2g-blue);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
+}
+
+/* An author `display` (e.g. .tp-list { display: flex }) otherwise wins
+   over the UA stylesheet's [hidden] rule and leaves the element visible. */
+[hidden] {
+  display: none !important;
 }
 
 .visually-hidden {
@@ -251,327 +261,328 @@ a:hover {
 }
 
 /* --- Phone mock ---------------------------------------------- */
+/* The frame keeps the design's dimensions. Inside it, .app is a
+   1:1 reproduction of the real iOS app at 393x852pt (iPhone 15/16),
+   scaled down to the frame's interior width by --app-scale. Every
+   value inside .app is therefore a real point value from
+   mobile/src/app/(home)/index.tsx, so the two stay comparable. */
 .phone-wrap {
   display: flex;
   justify-content: center;
 }
 .phone {
-  width: 340px;
+  --app-width: 393;
+  --app-height: 852;
+  --frame-width: 340;
+  --frame-border: 10;
+  /* interior width ÷ app width */
+  --app-scale: calc(
+    (var(--frame-width) - 2 * var(--frame-border)) / var(--app-width)
+  );
+
+  width: calc(var(--frame-width) * 1px);
   max-width: 100%;
-  height: 600px;
-  border: 10px solid var(--gray-900);
+  height: calc(
+    var(--app-height) * var(--app-scale) * 1px + var(--frame-border) * 1px
+  );
+  border: calc(var(--frame-border) * 1px) solid var(--gray-900);
   border-bottom: 0;
   border-radius: 48px 48px 0 0;
-  background: var(--bg-subtle);
+  background: #fff;
   box-shadow: var(--shadow-large);
   overflow: hidden;
+}
+.phone__screen {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.app {
+  width: calc(var(--app-width) * 1px);
+  height: calc(var(--app-height) * 1px);
+  transform: scale(var(--app-scale));
+  transform-origin: top left;
   display: flex;
   flex-direction: column;
-}
-.phone__status {
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--fg-default);
-}
-.phone__notch {
-  width: 90px;
-  height: 26px;
-  border-radius: 14px;
-  background: var(--gray-900);
-}
-.phone__battery {
-  font-family: var(--font-mono);
-  font-size: 11px;
-}
-.phone__titlebar {
-  padding: 8px 20px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.phone__title {
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--fg-display);
-}
-.phone__back {
-  border: 0;
-  background: none;
-  font: inherit;
+  position: relative;
+  background: #fff;
+  color: #000;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter",
+    system-ui, sans-serif;
+  /* React Native's default <Text> size; the app only overrides it on
+     the header title (17) and the send button (16). */
   font-size: 14px;
-  color: var(--s2g-blue);
-  cursor: pointer;
-  padding: 8px 0;
-}
-.phone__back[hidden] {
-  display: none;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 
-.screen {
-  flex: 1;
-  min-height: 0;
-  flex-direction: column;
-  display: flex;
-}
-.screen[hidden] {
-  display: none;
-}
-.screen--editor,
-.screen--list {
-  padding: 0 16px 16px;
-}
-.screen--editor {
-  gap: 12px;
-}
-.screen--list {
-  gap: 8px;
-}
-.screen--sent {
-  padding: 24px 16px;
-  gap: 16px;
-}
-
-/* Editor screen */
-.tp-fetch {
-  height: 44px;
+/* iOS status bar ------------------------------------------------ */
+.app__statusbar {
+  height: 59px;
   flex: none;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  background: var(--bg-default);
-  font: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--fg-default);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 30px 0;
+  color: #000;
+}
+.app__time {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  width: 54px;
+}
+.app__island {
+  width: 125px;
+  height: 37px;
+  border-radius: 19px;
+  background: #000;
+  margin-top: -6px;
+}
+.app__indicators {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 54px;
+  justify-content: flex-end;
+}
+
+/* Native stack header ------------------------------------------- */
+.app__header {
+  height: 54px;
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  cursor: pointer;
-  box-shadow: var(--shadow-micro);
-  text-align: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
-.tp-fetch:hover {
-  background: var(--bg-hover);
+.app__logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  border: 1.5px solid var(--app-teal);
 }
-.workout-text {
-  flex: 1;
-  min-height: 0;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  background: var(--bg-default);
-  padding: 12px;
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  line-height: 1.7;
-  color: var(--fg-default);
-  white-space: pre-wrap;
-  overflow: hidden;
-}
-.field-group {
-  flex: none;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  background: var(--bg-default);
-  padding: 0 12px;
-}
-.field-row {
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 14px;
-}
-.field-row--sub {
-  height: 40px;
-  border-top: 1px solid var(--border-subtle);
-  color: var(--fg-secondary);
-}
-.field-row--sub[hidden] {
-  display: none;
-}
-.field-row__value {
-  color: var(--fg-default);
-  font-weight: 500;
-}
-.switch {
-  width: 44px;
-  height: 26px;
-  border: 0;
-  border-radius: 13px;
-  background: var(--gray-300);
-  position: relative;
-  cursor: pointer;
-  padding: 0;
-  transition: background var(--duration-base) var(--ease-standard);
-  flex: none;
-}
-.switch[aria-checked="true"] {
-  background: var(--s2g-green);
-}
-.switch__knob {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: var(--shadow-micro);
-  transition: left var(--duration-base) var(--ease-standard);
-}
-.switch[aria-checked="true"] .switch__knob {
-  left: 21px;
-}
-.btn-send {
-  height: 48px;
-  flex: none;
-  border: 0;
-  border-radius: var(--radius-lg);
-  background: var(--s2g-blue);
-  color: #fff;
-  font: inherit;
-  font-size: 15px;
+.app__headertitle {
+  font-size: 17px;
   font-weight: 600;
-  cursor: pointer;
-}
-.btn-send:hover {
-  background: #1a5faa;
 }
 
-/* TrainingPeaks list screen */
-.list-label {
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--fg-tertiary);
-  font-weight: 500;
-  padding: 4px 4px 0;
-  flex: none;
+/* Scroll content ------------------------------------------------ */
+.app__content {
+  flex: 1;
+  min-height: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
 }
-.wk-list {
+
+.tp-button {
+  height: 44px;
+  flex: none;
+  border: 1px solid var(--app-teal);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--app-teal);
+  font: inherit;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 12px;
+  cursor: pointer;
+}
+.tp-button:active {
+  opacity: 0.6;
+}
+
+.tp-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  overflow-y: auto;
-  min-height: 0;
+  flex: none;
 }
-.wk-item {
+.tp-item {
   width: 100%;
-  min-height: 60px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  background: var(--bg-default);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--app-teal-bg);
+  border: 0;
+  border-radius: 10px;
+  padding: 12px;
   font: inherit;
   text-align: left;
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
   cursor: pointer;
-  box-shadow: var(--shadow-micro);
 }
-.wk-item:hover {
-  background: var(--bg-hover);
+.tp-item:hover {
+  filter: brightness(0.97);
 }
-.wk-item__meta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.tp-item__day {
+  font-weight: 700;
+  color: var(--app-teal);
+  text-transform: capitalize;
+  white-space: nowrap;
 }
-.wk-item__title {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--fg-default);
-}
-.wk-item__day {
-  font-size: 12px;
-  color: var(--fg-tertiary);
-}
-.wk-item__dist {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--fg-secondary);
+.tp-item__info {
+  flex: 1;
+  color: #333;
 }
 
-/* Confirmation screen */
-.sent-card {
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-xl);
-  background: var(--bg-default);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  box-shadow: var(--shadow-tiny);
+.app-input {
+  min-height: 180px;
+  flex: none;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+  line-height: 1.35;
+  overflow: hidden;
 }
-.badge-success {
-  align-self: flex-start;
+.app-input__placeholder {
+  color: #c4c4c6;
+  white-space: pre-wrap;
+}
+.app-input__text {
+  margin: 0;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.35;
+  color: #000;
+  white-space: pre-wrap;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+.schedule-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 12px;
-  background: var(--status-success-bg);
-  color: var(--status-success-fg);
-  font-size: 12px;
+  justify-content: flex-end;
+  gap: 12px;
+  flex: none;
+}
+.schedule-row__label {
+  flex: 1;
   font-weight: 600;
 }
-.badge-success__dot {
-  width: 6px;
-  height: 6px;
+/* Matches the iOS compact DateTimePicker the app renders when
+   scheduling is on. */
+.schedule-row__date {
+  background: rgba(118, 118, 128, 0.12);
+  border-radius: 6px;
+  padding: 5px 11px;
+  color: #000;
+  white-space: nowrap;
+}
+.ios-switch {
+  width: 51px;
+  height: 31px;
+  flex: none;
+  border: 0;
+  border-radius: 16px;
+  background: #e9e9ea;
+  position: relative;
+  padding: 0;
+  cursor: pointer;
+  transition: background var(--duration-base) var(--ease-standard);
+}
+.ios-switch[aria-checked="true"] {
+  background: #34c759;
+}
+.ios-switch__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
   border-radius: 50%;
-  background: var(--brand-green);
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.16);
+  transition: left var(--duration-base) var(--ease-standard);
 }
-.sent-name {
-  font-family: var(--font-mono);
+.ios-switch[aria-checked="true"] .ios-switch__knob {
+  left: 22px;
+}
+
+.send-button {
+  height: 48px;
+  flex: none;
+  border: 0;
+  border-radius: 10px;
+  background: var(--app-teal);
+  color: #fff;
+  font: inherit;
   font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+/* mirrors styles.buttonDisabled — opacity 0.5 */
+.send-button.is-disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Result message + link, mirroring styles.message / .success /
+   .workoutLink in the app. */
+.app-message {
+  margin: 0;
+  flex: none;
+  text-align: center;
+  padding: 8px;
+  border-radius: 8px;
+  background: #d1fae5;
+  color: #065f46;
+}
+.app-link {
+  flex: none;
+  color: var(--app-teal);
   font-weight: 600;
-  color: var(--fg-display);
+  text-align: center;
+  text-decoration: underline;
 }
-.sent-detail {
-  font-size: 13px;
-  color: var(--fg-secondary);
-  line-height: 1.5;
-}
-.btn-garmin {
-  height: 44px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  background: var(--bg-default);
+/* Floating native tab bar ---------------------------------------- */
+.app__tabbar {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 22px;
+  width: 224px;
+  height: 59px;
+  border-radius: 30px;
+  background: #6c6c6c;
   display: flex;
+  align-items: stretch;
+  overflow: hidden;
+}
+.app__tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  gap: 3px;
+  color: #fff;
+}
+.app__tab.is-active {
+  background: #4c4c4c;
+  border-radius: 30px;
+  color: #5fbcfa;
+}
+.app__tabicon {
+  width: 28px;
+  height: 22px;
+}
+.app__tablabel {
+  font-size: 10px;
   font-weight: 500;
-  color: var(--s2g-blue);
-  flex: none;
+  letter-spacing: 0;
 }
-.btn-text {
-  height: 44px;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: 14px;
-  color: var(--fg-secondary);
-  cursor: pointer;
-  flex: none;
-}
-.btn-text:hover {
-  color: var(--fg-default);
-}
-
 /* --- Generic section scaffolding ----------------------------- */
 .section {
   max-width: var(--s2g-measure);

@@ -1,11 +1,16 @@
 /**
- * Interactive product demo in the hero.
+ * Interactive demo of the app in the hero.
  *
- * Port of the `DCLogic` component from "Swim2Garmin Landing.dc.html": the
- * design canvas drove the phone mock with `sc-if` blocks over a small state
- * machine, which this reimplements against plain DOM.
+ * Mirrors the state the real screen keeps in
+ * mobile/src/app/(home)/index.tsx — text, tpWorkouts, scheduling,
+ * scheduleDate, message — and the transitions between them:
  *
- * Workout data is read from the `data-*` attributes on the `.wk-item`
+ *   fetchWeek()    shows the TrainingPeaks list
+ *   pickWorkout()  fills the text, hides the list, and turns scheduling
+ *                  on for a workout that is not in the past
+ *   send()         is disabled until there is a workout to parse
+ *
+ * Workout data lives in the `data-*` attributes on the .tp-item
  * buttons, so the markup stays the single source of truth.
  */
 (function () {
@@ -14,41 +19,28 @@
   var root = document.getElementById('demo');
   if (!root) return;
 
-  var SCREEN_TITLES = {
-    editor: 'Novo treino',
-    list: 'TrainingPeaks',
-    sent: 'Pronto'
-  };
-
-  var items = Array.prototype.slice.call(root.querySelectorAll('.wk-item'));
+  var items = Array.prototype.slice.call(root.querySelectorAll('.tp-item'));
   if (!items.length) return;
 
-  var workouts = items.map(function (el) {
-    return {
-      title: el.dataset.title,
-      day: el.dataset.day,
-      dist: el.dataset.dist,
-      text: el.dataset.text
-    };
-  });
-
   var el = {
-    title: root.querySelector('[data-demo="title"]'),
-    back: root.querySelector('[data-demo="back"]'),
+    list: root.querySelector('.tp-list'),
+    fetch: root.querySelector('.tp-button'),
+    placeholder: root.querySelector('[data-demo="placeholder"]'),
     text: root.querySelector('[data-demo="text"]'),
     toggle: root.querySelector('[data-demo="toggle-cal"]'),
-    dayRow: root.querySelector('[data-demo="day-row"]'),
-    day: root.querySelector('[data-demo="day"]'),
-    savedName: root.querySelector('[data-demo="saved-name"]'),
-    sentDetail: root.querySelector('[data-demo="sent-detail"]')
+    date: root.querySelector('[data-demo="date"]'),
+    send: root.querySelector('[data-demo="send"]'),
+    message: root.querySelector('[data-demo="message"]'),
+    link: root.querySelector('[data-demo="link"]')
   };
 
-  var screens = {};
-  root.querySelectorAll('[data-screen]').forEach(function (node) {
-    screens[node.dataset.screen] = node;
-  });
-
-  var state = { screen: 'editor', calendar: true, pick: 0 };
+  var state = {
+    text: '',
+    listVisible: true,
+    scheduling: false,
+    scheduleDate: '',
+    message: ''
+  };
 
   function setState(patch) {
     Object.assign(state, patch);
@@ -56,50 +48,52 @@
   }
 
   function render() {
-    var w = workouts[state.pick];
+    var hasWorkout = state.text !== '';
 
-    el.title.textContent = SCREEN_TITLES[state.screen];
-    el.back.hidden = state.screen !== 'list';
+    el.list.hidden = !state.listVisible;
 
-    Object.keys(screens).forEach(function (name) {
-      screens[name].hidden = name !== state.screen;
-    });
+    el.placeholder.hidden = hasWorkout;
+    el.text.hidden = !hasWorkout;
+    el.text.textContent = state.text;
 
-    el.text.textContent = w.text;
+    el.toggle.setAttribute('aria-checked', String(state.scheduling));
+    el.date.hidden = !state.scheduling;
+    el.date.textContent = state.scheduleDate;
 
-    el.toggle.setAttribute('aria-checked', String(state.calendar));
-    el.dayRow.hidden = !state.calendar;
-    el.day.textContent = w.day;
+    el.send.disabled = !hasWorkout;
+    el.send.classList.toggle('is-disabled', !hasWorkout);
 
-    el.savedName.textContent = 'Swim2Garmin ' + w.dist;
-    el.sentDetail.textContent = state.calendar
-      ? 'Agendado para ' + w.day + ' no calendário do Garmin Connect.'
-      : 'Salvo na sua biblioteca de treinos do Garmin Connect.';
+    el.message.hidden = state.message === '';
+    el.message.textContent = state.message;
+    el.link.hidden = state.message === '';
   }
 
-  root.querySelector('[data-demo="go-list"]').addEventListener('click', function () {
-    setState({ screen: 'list' });
+  el.fetch.addEventListener('click', function () {
+    setState({ listVisible: true, message: '' });
   });
 
-  el.back.addEventListener('click', function () {
-    setState({ screen: 'editor' });
-  });
-
-  root.querySelector('[data-demo="send"]').addEventListener('click', function () {
-    setState({ screen: 'sent' });
-  });
-
-  root.querySelector('[data-demo="reset"]').addEventListener('click', function () {
-    setState({ screen: 'editor' });
+  items.forEach(function (node) {
+    node.addEventListener('click', function () {
+      setState({
+        text: node.dataset.text,
+        listVisible: false,
+        scheduling: true,
+        scheduleDate: node.dataset.day,
+        message: ''
+      });
+    });
   });
 
   el.toggle.addEventListener('click', function () {
-    setState({ calendar: !state.calendar });
+    setState({ scheduling: !state.scheduling });
   });
 
-  items.forEach(function (node, i) {
-    node.addEventListener('click', function () {
-      setState({ pick: i, screen: 'editor' });
+  el.send.addEventListener('click', function () {
+    if (state.text === '') return;
+    setState({
+      message: state.scheduling
+        ? 'Treino criado e agendado para ' + state.scheduleDate + ' ✓'
+        : 'Treino criado no Garmin Connect ✓'
     });
   });
 

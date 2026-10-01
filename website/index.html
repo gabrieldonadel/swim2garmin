@@ -65,108 +65,119 @@
           </p>
         </div>
 
-        <!-- Interactive product demo. Decorative: the page's content does
-             not depend on it, and it degrades to the editor screen with no JS. -->
+        <!-- Interactive demo of the real app. Decorative: the page's content
+             does not depend on it, and with no JS it stays on the default
+             state shown here. Sizes inside .app are real iOS points, taken
+             from mobile/src/app/(home)/index.tsx; .app is scaled as a whole
+             to the width of the device frame. -->
         <div class="phone-wrap">
-          <div class="phone" id="demo">
-            <div class="phone__status">
-              <span>9:41</span>
-              <span class="phone__notch"></span>
-              <span class="phone__battery">100%</span>
-            </div>
-            <div class="phone__titlebar">
-              <span class="phone__title" data-demo="title">Novo treino</span>
-              <button class="phone__back" type="button" data-demo="back" hidden>Voltar</button>
-            </div>
+          <div class="phone">
+            <div class="phone__screen">
+              <div class="app" id="demo">
 
-            <!-- Editor ------------------------------------------- -->
-            <div class="screen screen--editor" data-screen="editor">
-              <button class="tp-fetch" type="button" data-demo="go-list">Buscar treinos da semana no TrainingPeaks</button>
-              <!-- Mirrors the first item in .wk-list below so the demo reads
-                   correctly before the deferred script runs. -->
-              <pre class="workout-text" data-demo="text">200m A1 (75m crawl, 25m costas) com 30"
-6x50m (1 palmateio, 1 ondulação braçada unilateral, 1 perna costas) com 15"
-150m A1 crawl segurando palmar com 20"
-4x25m A3 crawl palmar pé-pato pqp P com 45"
-50m A1 livre com 30"</pre>
-              <div class="field-group">
-                <div class="field-row">
-                  <span id="demo-cal-label">Adicionar ao calendário</span>
-                  <button class="switch" type="button" role="switch" aria-checked="true"
-                          aria-labelledby="demo-cal-label" data-demo="toggle-cal">
-                    <span class="switch__knob"></span>
-                  </button>
+                <div class="app__statusbar">
+                  <span class="app__time">9:41</span>
+                  <span class="app__island"></span>
+                  <span class="app__indicators">
+                    <svg viewBox="0 0 18 12" width="18" height="12" aria-hidden="true">
+                      <rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/>
+                      <rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="currentColor"/>
+                      <rect x="10" y="3" width="3" height="9" rx="1" fill="currentColor"/>
+                      <rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/>
+                    </svg>
+                    <svg viewBox="0 0 16 12" width="16" height="12" aria-hidden="true">
+                      <path d="M8 10.6 6.2 8.8a2.6 2.6 0 0 1 3.6 0L8 10.6Z" fill="currentColor"/>
+                      <path d="M3.6 6.3a6.3 6.3 0 0 1 8.8 0" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+                      <path d="M1 3.6a10 10 0 0 1 14 0" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+                    </svg>
+                    <svg viewBox="0 0 27 13" width="27" height="13" aria-hidden="true">
+                      <rect x="0.5" y="0.5" width="22" height="12" rx="3.8" stroke="currentColor" stroke-opacity="0.4" fill="none"/>
+                      <rect x="2" y="2" width="19" height="9" rx="2.5" fill="currentColor"/>
+                      <path d="M24.5 4.5v4a2.6 2.6 0 0 0 0-4Z" fill="currentColor" fill-opacity="0.4"/>
+                    </svg>
+                  </span>
                 </div>
-                <div class="field-row field-row--sub" data-demo="day-row">
-                  <span>Dia</span>
-                  <span class="field-row__value" data-demo="day">Seg, 29 set</span>
+
+                <header class="app__header">
+                  <img class="app__logo" src="assets/app-logo.png" alt="" width="28" height="28">
+                  <span class="app__headertitle">Swim2Garmin</span>
+                </header>
+
+                <div class="app__content">
+                  <button class="tp-button" type="button">Buscar treinos da semana no TrainingPeaks</button>
+
+                  <ul class="tp-list">
+                    <li>
+                      <button class="tp-item" type="button" data-day="29/09/2026"
+                              data-text="800m A1 livre com 30&quot;&#10;8x50m (25m técnica, 25m livre) com 15&quot;&#10;6x100m A2 crawl com 20&quot;&#10;4x75m A3 crawl palmar com 25&quot;&#10;400m A1 costas com 30&quot;">
+                        <span class="tp-item__day">Ter., 29/09</span>
+                        <span class="tp-item__info">Natação · 2500m</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button class="tp-item" type="button" data-day="01/10/2026"
+                              data-text="500m A1 livre com 30&quot;&#10;10x50m A2 crawl com 20&quot;&#10;4x150m A3 crawl com 30&quot;&#10;400m A1 livre palmar com 30&quot;">
+                        <span class="tp-item__day">Qui., 01/10</span>
+                        <span class="tp-item__info">Natação · 2000m</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button class="tp-item" type="button" data-day="02/10/2026"
+                              data-text="700m A1 livre com 30&quot;&#10;12x25m A3 crawl com 45&quot;&#10;8x100m A2 medley com 20&quot;&#10;4x100m A1 costas com 20&quot;&#10;300m A1 livre com 30&quot;">
+                        <span class="tp-item__day">Sex., 02/10</span>
+                        <span class="tp-item__info">Natação · 2500m</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button class="tp-item" type="button" data-day="03/10/2026"
+                              data-text="483m A1 livre wetsuit com 30&quot;&#10;6x200m A2 crawl palmar com 20&quot;&#10;4x100m A1 bóia com 15&quot;&#10;200m A1 livre solto com 30&quot;">
+                        <span class="tp-item__day">Sáb., 03/10</span>
+                        <span class="tp-item__info">Natação (palmar, bóia, wetsuit) · 2283m</span>
+                      </button>
+                    </li>
+                  </ul>
+
+                  <div class="app-input" data-demo="input">
+                    <span class="app-input__placeholder" data-demo="placeholder">Cole seu treino de natação aqui…
+
+200m A1 livre com 20"
+4x50m técnica com 15"</span>
+                    <pre class="app-input__text" data-demo="text" hidden></pre>
+                  </div>
+
+                  <div class="schedule-row">
+                    <span class="schedule-row__label" id="demo-cal-label">Adicionar ao calendário</span>
+                    <span class="schedule-row__date" data-demo="date" hidden></span>
+                    <button class="ios-switch" type="button" role="switch" aria-checked="false"
+                            aria-labelledby="demo-cal-label" data-demo="toggle-cal">
+                      <span class="ios-switch__knob"></span>
+                    </button>
+                  </div>
+
+                  <button class="send-button is-disabled" type="button" data-demo="send" disabled>Enviar para o Garmin</button>
+
+                  <p class="app-message" data-demo="message" hidden></p>
+                  <span class="app-link" data-demo="link" hidden>Ver treino no Garmin Connect &rarr;</span>
                 </div>
-              </div>
-              <button class="btn-send" type="button" data-demo="send">Enviar para o Garmin</button>
-            </div>
 
-            <!-- TrainingPeaks list ------------------------------- -->
-            <div class="screen screen--list" data-screen="list" hidden>
-              <span class="list-label">Semana de 29 set</span>
-              <ul class="wk-list">
-                <li>
-                  <button class="wk-item" type="button"
-                          data-title="Técnica + A1" data-day="Seg, 29 set" data-dist="800m"
-                          data-text="200m A1 (75m crawl, 25m costas) com 30&quot;&#10;6x50m (1 palmateio, 1 ondulação braçada unilateral, 1 perna costas) com 15&quot;&#10;150m A1 crawl segurando palmar com 20&quot;&#10;4x25m A3 crawl palmar pé-pato pqp P com 45&quot;&#10;50m A1 livre com 30&quot;">
-                    <span class="wk-item__meta">
-                      <span class="wk-item__title">Técnica + A1</span>
-                      <span class="wk-item__day">Seg, 29 set</span>
-                    </span>
-                    <span class="wk-item__dist">800m</span>
-                  </button>
-                </li>
-                <li>
-                  <button class="wk-item" type="button"
-                          data-title="Limiar" data-day="Qua, 1 out" data-dist="3000m"
-                          data-text="400m A1 livre com 30&quot;&#10;8x100m A2 crawl com 20&quot;&#10;4x200m A3 crawl com 30&quot;&#10;10x50m A1 costas com 15&quot;&#10;500m A1 livre palmar com 30&quot;">
-                    <span class="wk-item__meta">
-                      <span class="wk-item__title">Limiar</span>
-                      <span class="wk-item__day">Qua, 1 out</span>
-                    </span>
-                    <span class="wk-item__dist">3000m</span>
-                  </button>
-                </li>
-                <li>
-                  <button class="wk-item" type="button"
-                          data-title="Velocidade" data-day="Sex, 3 out" data-dist="2200m"
-                          data-text="300m A1 livre com 30&quot;&#10;12x25m A3 crawl com 45&quot;&#10;6x100m A2 medley com 20&quot;&#10;4x150m A1 crawl com 20&quot;&#10;400m A1 livre com 30&quot;">
-                    <span class="wk-item__meta">
-                      <span class="wk-item__title">Velocidade</span>
-                      <span class="wk-item__day">Sex, 3 out</span>
-                    </span>
-                    <span class="wk-item__dist">2200m</span>
-                  </button>
-                </li>
-                <li>
-                  <button class="wk-item" type="button"
-                          data-title="Longo aeróbico" data-day="Sáb, 4 out" data-dist="4000m"
-                          data-text="500m A1 livre com 30&quot;&#10;5x400m A2 crawl com 30&quot;&#10;10x100m A1 costas com 15&quot;&#10;500m A1 livre com 30&quot;">
-                    <span class="wk-item__meta">
-                      <span class="wk-item__title">Longo aeróbico</span>
-                      <span class="wk-item__day">Sáb, 4 out</span>
-                    </span>
-                    <span class="wk-item__dist">4000m</span>
-                  </button>
-                </li>
-              </ul>
-            </div>
+                <nav class="app__tabbar" aria-label="Abas do app">
+                  <span class="app__tab is-active">
+                    <svg class="app__tabicon" viewBox="0 0 28 20" aria-hidden="true">
+                      <circle cx="19.5" cy="4.2" r="2.6" fill="currentColor"/>
+                      <path d="M5.4 10.1 10 7.1a3 3 0 0 1 3.3 0l3.1 2.1" stroke="currentColor" stroke-width="2.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M1 15.4c1.6 0 1.6 1.6 3.2 1.6s1.6-1.6 3.2-1.6 1.6 1.6 3.2 1.6 1.6-1.6 3.2-1.6 1.6 1.6 3.2 1.6 1.6-1.6 3.2-1.6 1.6 1.6 3.2 1.6 1.6-1.6 3.2-1.6" stroke="currentColor" stroke-width="2.1" fill="none" stroke-linecap="round"/>
+                    </svg>
+                    <span class="app__tablabel">Treino</span>
+                  </span>
+                  <span class="app__tab">
+                    <svg class="app__tabicon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="currentColor" d="M19.14 12.94a7.5 7.5 0 0 0 0-1.88l2.03-1.58a.48.48 0 0 0 .12-.61l-1.92-3.32a.48.48 0 0 0-.59-.22l-2.39.96a7 7 0 0 0-1.62-.94l-.36-2.54a.47.47 0 0 0-.48-.41h-3.84a.47.47 0 0 0-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.48.48 0 0 0-.59.22L2.74 8.87a.48.48 0 0 0 .12.61l2.03 1.58a7.5 7.5 0 0 0 0 1.88l-2.03 1.58a.48.48 0 0 0-.12.61l1.92 3.32c.12.22.37.3.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.48.48 0 0 0-.12-.61l-2.03-1.58ZM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2Z"/>
+                    </svg>
+                    <span class="app__tablabel">Configurações</span>
+                  </span>
+                </nav>
 
-            <!-- Confirmation ------------------------------------- -->
-            <div class="screen screen--sent" data-screen="sent" hidden>
-              <div class="sent-card">
-                <span class="badge-success">
-                  <span class="badge-success__dot"></span>Treino enviado
-                </span>
-                <span class="sent-name" data-demo="saved-name">Swim2Garmin 800m</span>
-                <span class="sent-detail" data-demo="sent-detail">Agendado para Seg, 29 set no calendário do Garmin Connect.</span>
               </div>
-              <a class="btn-garmin" href="https://connect.garmin.com/">Ver treino no Garmin Connect&nbsp;↗</a>
-              <button class="btn-text" type="button" data-demo="reset">Novo treino</button>
             </div>
           </div>
         </div>
