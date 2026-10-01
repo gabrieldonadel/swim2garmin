@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swim2Garmin — Do TrainingPeaks para o seu Garmin em dois toques</title>
+<meta name="description" content="O Swim2Garmin facilita nadadores importarem seus treinos do TrainingPeaks para o Garmin Connect. App para iOS e Android e extensão para Chrome e Firefox. Código aberto, licença MIT.">
+<meta name="theme-color" content="#f3f9fc">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<link rel="canonical" href="https://github.com/gabrieldonadel/swim2garmin">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Swim2Garmin — Do TrainingPeaks para o seu Garmin em dois toques">
+<meta property="og:description" content="Importe seus treinos de natação do TrainingPeaks para o Garmin Connect. App para iOS e Android e extensão para o navegador.">
+<meta property="og:image" content="assets/swim2garmin-logo.png">
+<meta name="twitter:card" content="summary">
+
+<link rel="preload" href="styles/ds/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles/ds/colors_and_type.css">
+<link rel="stylesheet" href="styles/ds/shared.css">
+<link rel="stylesheet" href="styles/site.css">
+<script src="scripts/app-demo.js" defer></script>
+</head>
+<body>
+
+<div class="site">
+
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="#top">
+        <img class="brand__mark" src="assets/swim2garmin-logo.png" alt="" width="36" height="36">
+        Swim2Garmin
+      </a>
+      <nav class="site-nav" aria-label="Navegação principal">
+        <a class="site-nav__link" href="#app">App</a>
+        <a class="site-nav__link" href="#formato">Formato</a>
+        <a class="site-nav__link" href="#extensao">Extensão</a>
+        <a class="site-nav__gh" href="https://github.com/gabrieldonadel/swim2garmin">GitHub&nbsp;↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- Hero ------------------------------------------------------ -->
+    <section class="hero">
+      <div class="hero__glow"></div>
+      <div class="hero__inner">
+
+        <div class="hero__copy">
+          <p class="hero-eyebrow">
+            <span class="hero-eyebrow__dot"></span>
+            App para iOS e Android
+          </p>
+          <h1 class="hero__title">Do TrainingPeaks para o seu Garmin em dois toques.</h1>
+          <p class="hero__lead">O Swim2Garmin facilita nadadores importarem seus treinos do TrainingPeaks para o Garmin Connect. Esqueça a complexidade de montar treinos passo a passo na interface da Garmin.</p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="https://github.com/gabrieldonadel/swim2garmin/tree/master/mobile">Baixar o app</a>
+            <a class="btn btn--secondary" href="#extensao">Usar no navegador&nbsp;→</a>
+          </div>
+          <p class="hero__meta">
+            <span>Código aberto · MIT</span>
+            <span>Feito com Expo</span>
+          </p>
+        </div>
+
+        <!-- Interactive product demo. Decorative: the page's content does
+             not depend on it, and it degrades to the editor screen with no JS. -->
+        <div class="phone-wrap">
+          <div class="phone" id="demo">
+            <div class="phone__status">
+              <span>9:41</span>
+              <span class="phone__notch"></span>
+              <span class="phone__battery">100%</span>
+            </div>
+            <div class="phone__titlebar">
+              <span class="phone__title" data-demo="title">Novo treino</span>
+              <button class="phone__back" type="button" data-demo="back" hidden>Voltar</button>
+            </div>
+
+            <!-- Editor ------------------------------------------- -->
+            <div class="screen screen--editor" data-screen="editor">
+              <button class="tp-fetch" type="button" data-demo="go-list">Buscar treinos da semana no TrainingPeaks</button>
+              <!-- Mirrors the first item in .wk-list below so the demo reads
+                   correctly before the deferred script runs. -->
+              <pre class="workout-text" data-demo="text">200m A1 (75m crawl, 25m costas) com 30"
+6x50m (1 palmateio, 1 ondulação braçada unilateral, 1 perna costas) com 15"
+150m A1 crawl segurando palmar com 20"
+4x25m A3 crawl palmar pé-pato pqp P com 45"
+50m A1 livre com 30"</pre>
+              <div class="field-group">
+                <div class="field-row">
+                  <span id="demo-cal-label">Adicionar ao calendário</span>
+                  <button class="switch" type="button" role="switch" aria-checked="true"
+                          aria-labelledby="demo-cal-label" data-demo="toggle-cal">
+                    <span class="switch__knob"></span>
+                  </button>
+                </div>
+                <div class="field-row field-row--sub" data-demo="day-row">
+                  <span>Dia</span>
+                  <span class="field-row__value" data-demo="day">Seg, 29 set</span>
+                </div>
+              </div>
+              <button class="btn-send" type="button" data-demo="send">Enviar para o Garmin</button>
+            </div>
+
+            <!-- TrainingPeaks list ------------------------------- -->
+            <div class="screen screen--list" data-screen="list" hidden>
+              <span class="list-label">Semana de 29 set</span>
+              <ul class="wk-list">
+                <li>
+                  <button class="wk-item" type="button"
+                          data-title="Técnica + A1" data-day="Seg, 29 set" data-dist="800m"
+                          data-text="200m A1 (75m crawl, 25m costas) com 30&quot;&#10;6x50m (1 palmateio, 1 ondulação braçada unilateral, 1 perna costas) com 15&quot;&#10;150m A1 crawl segurando palmar com 20&quot;&#10;4x25m A3 crawl palmar pé-pato pqp P com 45&quot;&#10;50m A1 livre com 30&quot;">
+                    <span class="wk-item__meta">
+                      <span class="wk-item__title">Técnica + A1</span>
+                      <span class="wk-item__day">Seg, 29 set</span>
+                    </span>
+                    <span class="wk-item__dist">800m</span>
+                  </button>
+                </li>
+                <li>
+                  <button class="wk-item" type="button"
+                          data-title="Limiar" data-day="Qua, 1 out" data-dist="3000m"
+                          data-text="400m A1 livre com 30&quot;&#10;8x100m A2 crawl com 20&quot;&#10;4x200m A3 crawl com 30&quot;&#10;10x50m A1 costas com 15&quot;&#10;500m A1 livre palmar com 30&quot;">
+                    <span class="wk-item__meta">
+                      <span class="wk-item__title">Limiar</span>
+                      <span class="wk-item__day">Qua, 1 out</span>
+                    </span>
+                    <span class="wk-item__dist">3000m</span>
+                  </button>
+                </li>
+                <li>
+                  <button class="wk-item" type="button"
+                          data-title="Velocidade" data-day="Sex, 3 out" data-dist="2200m"
+                          data-text="300m A1 livre com 30&quot;&#10;12x25m A3 crawl com 45&quot;&#10;6x100m A2 medley com 20&quot;&#10;4x150m A1 crawl com 20&quot;&#10;400m A1 livre com 30&quot;">
+                    <span class="wk-item__meta">
+                      <span class="wk-item__title">Velocidade</span>
+                      <span class="wk-item__day">Sex, 3 out</span>
+                    </span>
+                    <span class="wk-item__dist">2200m</span>
+                  </button>
+                </li>
+                <li>
+                  <button class="wk-item" type="button"
+                          data-title="Longo aeróbico" data-day="Sáb, 4 out" data-dist="4000m"
+                          data-text="500m A1 livre com 30&quot;&#10;5x400m A2 crawl com 30&quot;&#10;10x100m A1 costas com 15&quot;&#10;500m A1 livre com 30&quot;">
+                    <span class="wk-item__meta">
+                      <span class="wk-item__title">Longo aeróbico</span>
+                      <span class="wk-item__day">Sáb, 4 out</span>
+                    </span>
+                    <span class="wk-item__dist">4000m</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Confirmation ------------------------------------- -->
+            <div class="screen screen--sent" data-screen="sent" hidden>
+              <div class="sent-card">
+                <span class="badge-success">
+                  <span class="badge-success__dot"></span>Treino enviado
+                </span>
+                <span class="sent-name" data-demo="saved-name">Swim2Garmin 800m</span>
+                <span class="sent-detail" data-demo="sent-detail">Agendado para Seg, 29 set no calendário do Garmin Connect.</span>
+              </div>
+              <a class="btn-garmin" href="https://connect.garmin.com/">Ver treino no Garmin Connect&nbsp;↗</a>
+              <button class="btn-text" type="button" data-demo="reset">Novo treino</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Mobile-only features -------------------------------------- -->
+    <section class="section" id="app">
+      <div class="section-head">
+        <span class="kicker">Exclusivo do app mobile</span>
+        <h2 class="section-title">O treino da semana, pronto no relógio.</h2>
+      </div>
+      <div class="feature-grid">
+        <article class="feature">
+          <span class="feature__num">01</span>
+          <h3 class="feature__title">Importação do TrainingPeaks</h3>
+          <p class="feature__body">Busque os treinos de natação da semana direto do TrainingPeaks e envie para o Garmin com dois toques.</p>
+        </article>
+        <article class="feature">
+          <span class="feature__num">02</span>
+          <h3 class="feature__title">Agendamento no calendário</h3>
+          <p class="feature__body">Adicione o treino a um dia específico do calendário do Garmin Connect.</p>
+        </article>
+        <article class="feature">
+          <span class="feature__num">03</span>
+          <h3 class="feature__title">Distância no nome</h3>
+          <p class="feature__body">O treino é salvo com a distância total no nome (ex.: <code class="code-chip">Swim2Garmin 3000m</code>).</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- How to use ------------------------------------------------- -->
+    <section class="howto">
+      <div class="howto__inner">
+        <div class="howto__intro">
+          <span class="kicker">Como usar</span>
+          <h2 class="section-title">Quatro passos, um login.</h2>
+          <p class="section-lead">No primeiro uso, faça login no Garmin Connect (e, se quiser importar treinos, no TrainingPeaks) pela própria tela do app. As sessões ficam salvas, então o login é feito só uma vez.</p>
+        </div>
+        <ol class="steps">
+          <li class="step">
+            <span class="step__num">1</span>
+            <span class="step__body">
+              <strong class="step__title">Importe do TrainingPeaks <span class="step__optional">(opcional)</span></strong>
+              <span class="step__detail">Toque em “Buscar treinos da semana no TrainingPeaks” e escolha um treino — o texto é preenchido automaticamente.</span>
+            </span>
+          </li>
+          <li class="step">
+            <span class="step__num">2</span>
+            <span class="step__body">
+              <strong class="step__title">Cole ou edite o treino</strong>
+              <span class="step__detail">Cole seu treino em linguagem natural, ou ajuste o que veio do TrainingPeaks.</span>
+            </span>
+          </li>
+          <li class="step">
+            <span class="step__num">3</span>
+            <span class="step__body">
+              <strong class="step__title">Agende <span class="step__optional">(opcional)</span></strong>
+              <span class="step__detail">Ative “Adicionar ao calendário” e escolha o dia.</span>
+            </span>
+          </li>
+          <li class="step">
+            <span class="step__num">4</span>
+            <span class="step__body">
+              <strong class="step__title">Envie</strong>
+              <span class="step__detail">Toque em “Enviar para o Garmin”. Ao final, use o link “Ver treino no Garmin Connect” para conferir.</span>
+            </span>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Workout format -------------------------------------------- -->
+    <section class="section format" id="formato">
+      <div class="format__intro">
+        <span class="kicker">Formato do treino</span>
+        <h2 class="section-title">Escreva como você já escreve.</h2>
+        <p class="section-lead">Uma série por linha, com repetições, distância, descrição e descanso. Séries complexas com repetições e descansos variados são suportadas.</p>
+        <div class="syntax">&lt;repetições&gt;x&lt;distância&gt;m &lt;descrição&gt; com &lt;descanso&gt;"</div>
+      </div>
+      <div class="code-window">
+        <div class="code-window__bar">
+          <span>treino.txt</span><span>800m</span>
+        </div>
+        <pre class="code-window__body"><div class="code-line"><span class="code-line__n">1</span><span><span class="t-dist">200m</span> A1 (75m crawl, 25m costas) <span class="t-kw">com</span> <span class="t-rest">30"</span></span></div><div class="code-line"><span class="code-line__n">2</span><span><span class="t-reps">6x</span><span class="t-dist">50m</span> (1 palmateio, 1 ondulação…) <span class="t-kw">com</span> <span class="t-rest">15"</span></span></div><div class="code-line"><span class="code-line__n">3</span><span><span class="t-dist">150m</span> A1 crawl segurando palmar <span class="t-kw">com</span> <span class="t-rest">20"</span></span></div><div class="code-line"><span class="code-line__n">4</span><span><span class="t-reps">4x</span><span class="t-dist">25m</span> A3 crawl palmar pé-pato pqp P <span class="t-kw">com</span> <span class="t-rest">45"</span></span></div><div class="code-line"><span class="code-line__n">5</span><span><span class="t-dist">50m</span> A1 livre <span class="t-kw">com</span> <span class="t-rest">30"</span></span></div></pre>
+      </div>
+    </section>
+
+    <!-- Browser extension ----------------------------------------- -->
+    <section class="ext" id="extensao">
+      <div class="ext__inner">
+        <div class="ext__copy">
+          <span class="kicker">Também no navegador</span>
+          <h2 class="ext__title">Prefere o computador? Use a extensão.</h2>
+          <p class="ext__body">Abra o Garmin Connect, cole o treino na extensão, confira a visualização prévia e importe com um clique.</p>
+        </div>
+        <div class="ext__actions">
+          <a class="btn btn--secondary" href="https://chromewebstore.google.com/detail/swim2garmin/oomnbdnhjjpjngonaneamhkmlpnjlcnk">Adicionar ao Chrome&nbsp;↗</a>
+          <a class="btn btn--secondary" href="https://addons.mozilla.org/en-US/firefox/addon/swim2garmin/">Adicionar ao Firefox&nbsp;↗</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <span>Swim2Garmin · Licença MIT</span>
+      <div class="site-footer__links">
+        <a href="https://github.com/gabrieldonadel/swim2garmin">GitHub</a>
+        <a href="https://github.com/gabrieldonadel/swim2garmin/issues">Reportar problema</a>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+</body>
+</html>

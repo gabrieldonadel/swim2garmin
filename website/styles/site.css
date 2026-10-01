@@ -1,0 +1,911 @@
+/* ============================================================
+   Swim2Garmin — landing page styles
+   Implements "Swim2Garmin Landing.dc.html" from the Claude
+   Design project. Consumes tokens from ds/colors_and_type.css
+   and the resets in ds/shared.css.
+   ============================================================ */
+
+/* Self-hosted JetBrains Mono. The design system declares this family
+   against a fonts.gstatic.com URL; re-declaring it here (after the DS
+   sheet) keeps the page self-contained with no third-party request.
+   Same family name + weight range, so this rule wins. */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url("ds/fonts/JetBrainsMono-Variable.woff2") format("woff2-variations");
+}
+
+:root {
+  /* Page accents. The design uses its own blue/green rather than the
+     DS --brand-blue (#0072DE) / --brand-green, so they are named here. */
+  --s2g-blue: #1f6fc5;
+  --s2g-green: #2e9a78;
+
+  /* Hero surface */
+  --s2g-hero-bg: #f3f9fc;
+  --s2g-hero-dot: #cfe3ee;
+
+  /* Syntax colors for the workout code sample */
+  --s2g-syn-dist: #5cc3ee;
+  --s2g-syn-reps: #6fcba4;
+
+  --s2g-measure: 1200px;
+}
+
+/* Page-level overrides from the design's own <style> block ---- */
+body {
+  margin: 0;
+  background: var(--bg-default);
+  color: var(--fg-default);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+a {
+  color: var(--fg-default);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--s2g-blue);
+}
+
+:where(a, button):focus-visible {
+  outline: 2px solid var(--s2g-blue);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.site {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Header -------------------------------------------------- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.site-header__inner {
+  max-width: var(--s2g-measure);
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  color: var(--fg-display);
+}
+.brand:hover {
+  color: var(--fg-display);
+}
+.brand__mark {
+  width: 36px;
+  height: 36px;
+  margin: -4px;
+  object-fit: contain;
+}
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font-size: 14px;
+  color: var(--fg-secondary);
+}
+.site-nav__link {
+  color: var(--fg-secondary);
+}
+.site-nav__gh {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--fg-default);
+  box-shadow: var(--shadow-button);
+}
+
+/* --- Buttons ------------------------------------------------- */
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  box-shadow: var(--shadow-button);
+}
+.btn--primary {
+  background: var(--s2g-blue);
+  color: #fff;
+}
+.btn--primary:hover {
+  background: #1a5faa;
+  color: #fff;
+}
+.btn--secondary {
+  border-color: var(--border-default);
+  background: var(--bg-default);
+  color: var(--fg-default);
+}
+.btn--secondary:hover {
+  background: var(--bg-subtle);
+}
+
+/* --- Hero ---------------------------------------------------- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--s2g-hero-bg);
+  background-image: radial-gradient(var(--s2g-hero-dot) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.hero__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 60% 70% at 30% 40%,
+    var(--s2g-hero-bg) 30%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+.hero__inner {
+  position: relative;
+  max-width: var(--s2g-measure);
+  margin: 0 auto;
+  padding: 96px 24px 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+  gap: 64px;
+  align-items: end;
+}
+.hero__copy {
+  padding-bottom: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.hero__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(40px, 6vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  color: var(--fg-display);
+  text-wrap: balance;
+}
+.hero__lead {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--fg-secondary);
+  max-width: 520px;
+  text-wrap: pretty;
+}
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 8px;
+}
+.hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--fg-tertiary);
+}
+
+/* Eyebrow with a status dot */
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+  font-weight: 500;
+}
+.hero-eyebrow__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--s2g-green);
+}
+
+/* --- Phone mock ---------------------------------------------- */
+.phone-wrap {
+  display: flex;
+  justify-content: center;
+}
+.phone {
+  width: 340px;
+  max-width: 100%;
+  height: 600px;
+  border: 10px solid var(--gray-900);
+  border-bottom: 0;
+  border-radius: 48px 48px 0 0;
+  background: var(--bg-subtle);
+  box-shadow: var(--shadow-large);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.phone__status {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-default);
+}
+.phone__notch {
+  width: 90px;
+  height: 26px;
+  border-radius: 14px;
+  background: var(--gray-900);
+}
+.phone__battery {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.phone__titlebar {
+  padding: 8px 20px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.phone__title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--fg-display);
+}
+.phone__back {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: var(--s2g-blue);
+  cursor: pointer;
+  padding: 8px 0;
+}
+.phone__back[hidden] {
+  display: none;
+}
+
+.screen {
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  display: flex;
+}
+.screen[hidden] {
+  display: none;
+}
+.screen--editor,
+.screen--list {
+  padding: 0 16px 16px;
+}
+.screen--editor {
+  gap: 12px;
+}
+.screen--list {
+  gap: 8px;
+}
+.screen--sent {
+  padding: 24px 16px;
+  gap: 16px;
+}
+
+/* Editor screen */
+.tp-fetch {
+  height: 44px;
+  flex: none;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-default);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fg-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: var(--shadow-micro);
+  text-align: center;
+}
+.tp-fetch:hover {
+  background: var(--bg-hover);
+}
+.workout-text {
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-default);
+  padding: 12px;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--fg-default);
+  white-space: pre-wrap;
+  overflow: hidden;
+}
+.field-group {
+  flex: none;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-default);
+  padding: 0 12px;
+}
+.field-row {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+}
+.field-row--sub {
+  height: 40px;
+  border-top: 1px solid var(--border-subtle);
+  color: var(--fg-secondary);
+}
+.field-row--sub[hidden] {
+  display: none;
+}
+.field-row__value {
+  color: var(--fg-default);
+  font-weight: 500;
+}
+.switch {
+  width: 44px;
+  height: 26px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--gray-300);
+  position: relative;
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--duration-base) var(--ease-standard);
+  flex: none;
+}
+.switch[aria-checked="true"] {
+  background: var(--s2g-green);
+}
+.switch__knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow-micro);
+  transition: left var(--duration-base) var(--ease-standard);
+}
+.switch[aria-checked="true"] .switch__knob {
+  left: 21px;
+}
+.btn-send {
+  height: 48px;
+  flex: none;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--s2g-blue);
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-send:hover {
+  background: #1a5faa;
+}
+
+/* TrainingPeaks list screen */
+.list-label {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+  font-weight: 500;
+  padding: 4px 4px 0;
+  flex: none;
+}
+.wk-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.wk-item {
+  width: 100%;
+  min-height: 60px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-default);
+  font: inherit;
+  text-align: left;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  box-shadow: var(--shadow-micro);
+}
+.wk-item:hover {
+  background: var(--bg-hover);
+}
+.wk-item__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.wk-item__title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fg-default);
+}
+.wk-item__day {
+  font-size: 12px;
+  color: var(--fg-tertiary);
+}
+.wk-item__dist {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-secondary);
+}
+
+/* Confirmation screen */
+.sent-card {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  background: var(--bg-default);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-tiny);
+}
+.badge-success {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 12px;
+  background: var(--status-success-bg);
+  color: var(--status-success-fg);
+  font-size: 12px;
+  font-weight: 600;
+}
+.badge-success__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand-green);
+}
+.sent-name {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fg-display);
+}
+.sent-detail {
+  font-size: 13px;
+  color: var(--fg-secondary);
+  line-height: 1.5;
+}
+.btn-garmin {
+  height: 44px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--s2g-blue);
+  flex: none;
+}
+.btn-text {
+  height: 44px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: var(--fg-secondary);
+  cursor: pointer;
+  flex: none;
+}
+.btn-text:hover {
+  color: var(--fg-default);
+}
+
+/* --- Generic section scaffolding ----------------------------- */
+.section {
+  max-width: var(--s2g-measure);
+  width: 100%;
+  margin: 0 auto;
+  padding: 96px 24px;
+}
+.section-head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 640px;
+  margin-bottom: 48px;
+}
+.kicker {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+  font-weight: 500;
+}
+.section-title {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+  color: var(--fg-display);
+  text-wrap: balance;
+}
+.section-lead {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--fg-secondary);
+  max-width: 440px;
+  text-wrap: pretty;
+}
+
+/* Inline code chip */
+.code-chip {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: var(--radius-sm);
+  padding: 1px 6px;
+  color: var(--code-fg);
+  line-height: inherit;
+}
+
+/* --- Feature grid (hairlines via 1px gap over a tinted bg) --- */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--border-default);
+  gap: 1px;
+}
+.feature {
+  background: var(--bg-default);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.feature__num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--s2g-green);
+}
+.feature__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.feature__body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--fg-secondary);
+  text-wrap: pretty;
+}
+
+/* --- How-to ------------------------------------------------- */
+.howto {
+  background: var(--bg-subtle);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.howto__inner {
+  max-width: var(--s2g-measure);
+  margin: 0 auto;
+  padding: 96px 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+  gap: 64px;
+}
+.howto__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+.step {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 16px;
+  padding: 20px 0;
+  border-top: 1px solid var(--border-default);
+}
+.step:last-child {
+  border-bottom: 1px solid var(--border-default);
+}
+.step__num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--s2g-blue);
+  padding-top: 2px;
+}
+.step__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.step__title {
+  font-weight: 600;
+  font-size: 16px;
+}
+.step__optional {
+  font-weight: 400;
+  color: var(--fg-tertiary);
+}
+.step__detail {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--fg-secondary);
+}
+
+/* --- Workout format ----------------------------------------- */
+.format {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+  gap: 64px;
+  align-items: start;
+}
+.format__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.syntax {
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 12px 14px;
+  border: 1px solid var(--code-border);
+  border-radius: var(--radius-lg);
+  background: var(--code-bg);
+  color: var(--fg-default);
+  overflow-x: auto;
+}
+
+.code-window {
+  border: 1px solid var(--gray-800);
+  border-radius: var(--radius-xl);
+  background: var(--gray-900);
+  overflow: hidden;
+  box-shadow: var(--shadow-medium);
+}
+.code-window__bar {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--gray-800);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gray-500);
+}
+.code-window__body {
+  /* Reset the design system's bare `pre` rule, which otherwise paints a
+     light --code-bg surface and border over this dark window. */
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 16px 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 2;
+  color: var(--gray-200);
+  overflow-x: auto;
+  margin: 0;
+}
+.code-line {
+  display: grid;
+  grid-template-columns: 40px max-content;
+  white-space: pre;
+}
+.code-line__n {
+  text-align: right;
+  padding-right: 16px;
+  color: var(--gray-600);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.t-dist {
+  color: var(--s2g-syn-dist);
+}
+.t-reps {
+  color: var(--s2g-syn-reps);
+}
+.t-kw {
+  color: var(--gray-500);
+}
+.t-rest {
+  color: var(--brand-yellow);
+}
+
+/* --- Extension strip ---------------------------------------- */
+.ext {
+  border-top: 1px solid var(--border-subtle);
+}
+.ext__inner {
+  max-width: var(--s2g-measure);
+  margin: 0 auto;
+  padding: 80px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+.ext__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 560px;
+}
+.ext__title {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  color: var(--fg-display);
+}
+.ext__body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--fg-secondary);
+  text-wrap: pretty;
+}
+.ext__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* --- Footer -------------------------------------------------- */
+.site-footer {
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-subtle);
+  margin-top: auto;
+}
+.site-footer__inner {
+  max-width: var(--s2g-measure);
+  margin: 0 auto;
+  padding: 32px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--fg-tertiary);
+}
+.site-footer__links {
+  display: flex;
+  gap: 20px;
+}
+.site-footer__links a {
+  color: var(--fg-secondary);
+}
+
+/* --- Responsive ---------------------------------------------- */
+/* The design is specified at desktop width only; the grids already
+   reflow via auto-fit. These rules cover the narrow viewports it
+   does not describe. */
+@media (max-width: 680px) {
+  .site-nav__link {
+    display: none;
+  }
+  .hero__inner {
+    padding-top: 56px;
+    gap: 48px;
+  }
+  .hero__copy {
+    padding-bottom: 56px;
+  }
+  .section,
+  .howto__inner {
+    padding-top: 64px;
+    padding-bottom: 64px;
+  }
+  .howto__inner,
+  .format {
+    gap: 40px;
+  }
+  .ext__inner {
+    padding-top: 56px;
+    padding-bottom: 56px;
+  }
+  .feature {
+    padding: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch,
+  .switch__knob {
+    transition: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
