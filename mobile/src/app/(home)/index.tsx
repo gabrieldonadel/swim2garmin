@@ -23,7 +23,7 @@ import {
 } from "@/components/trainingpeaks-connect";
 import { baseTrainingData } from "@/lib/constants";
 import { parseTrainingText } from "@/lib/parser";
-import { type PoolLength } from "@/lib/use-pool-length";
+import { type PoolLength } from "@/lib/use-settings";
 import { type TrainingData } from "@/lib/types";
 
 // distances of every executable step (repeat groups are flattened one level)
@@ -90,9 +90,9 @@ export default function Index() {
     if (!trimmed) {
       return null;
     }
-    const data = parseTrainingText(trimmed);
+    const data = parseTrainingText(trimmed, { lapRest: accounts.lapRest });
     return data.estimatedDistanceInMeters > 0 ? data : null;
-  }, [text]);
+  }, [text, accounts.lapRest]);
 
   const handleResult = (result: SendResult) => {
     setSending(false);

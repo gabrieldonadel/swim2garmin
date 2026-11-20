@@ -3,10 +3,11 @@ import { WorkoutStep } from "@src/types";
 
 interface Props {
   trainingText: string;
+  lapRest: boolean;
 }
 
-export const TrainingVisualizer = ({ trainingText }: Props) => {
-  const data = parseTrainingText(trainingText);
+export const TrainingVisualizer = ({ trainingText, lapRest }: Props) => {
+  const data = parseTrainingText(trainingText, { lapRest });
 
   if (!data || data.workoutSegments.length === 0) {
     return <div>No training data to display.</div>;

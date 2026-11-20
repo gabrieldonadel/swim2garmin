@@ -17,7 +17,9 @@ export interface WorkoutStep {
   };
   endConditionValue?: number;
   strokeType?: { [key: string]: any };
+  drillType?: { [key: string]: any };
   numberOfIterations?: number;
+  skipLastRestStep?: boolean;
   workoutSteps?: WorkoutStep[];
 }
 

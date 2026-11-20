@@ -22,6 +22,23 @@ const freeStrokeType = {
   displayOrder: 6,
 };
 
+// A kick length has no arm strokes, so the watch can't count it: a free step
+// never reaches its distance and the LAP closes it at 0 m. A drill step instead
+// logs its planned distance when LAP is pressed.
+const drillStrokeType = {
+  strokeTypeId: 4,
+  strokeTypeKey: "drill",
+  displayOrder: 4,
+};
+
+const kickDrillType = {
+  drillTypeId: 1,
+  drillTypeKey: "kick",
+  displayOrder: 1,
+};
+
+const isKick = (description: string) => /\b(perna|pernada|pernas|kick)\b/i.test(description);
+
 const mainStepType = {
   stepTypeId: 8,
   stepTypeKey: "main",
@@ -158,7 +175,25 @@ function parseLine(raw: string): ParsedLine {
   return { kind: "note", text: line };
 }
 
-export function parseTrainingText(text: string): TrainingData {
+export interface ParseOptions {
+  // End every set with a "press LAP when ready" rest instead of its timed rest.
+  // Off by default: after an accidental double LAP at the wall, the second
+  // press starts the next swim during the rest, and the LAP meant to leave
+  // the rest then ends that swim at 0 m.
+  lapRest?: boolean;
+}
+
+// Step layout, checked on a Forerunner 245 Music (firmware 3.10) emulator:
+// - a single set is emitted flat; a repeat ×1 only adds a repeat whose timed
+//   rest the watch skips on its last (only) pass.
+// - a repeat's rest is skipped on its last pass (`skipLastRestStep`), so the
+//   set's rest goes after the repeat instead, where the watch counts it down
+//   and starts the next swim on its own.
+// - a timed rest never runs into a LAP rest: when the timer expires into an
+//   open rest, the watch ignores LAP. With `lapRest`, the LAP rest replaces
+//   the set's timed rest.
+// - kick sets are drill steps (see `drillStrokeType`).
+export function parseTrainingText(text: string, options: ParseOptions = {}): TrainingData {
   const lines = text
     .split("\n")
     .map((line) => line.trim())
@@ -203,57 +238,79 @@ export function parseTrainingText(text: string): TrainingData {
   let stepOrder = 1;
   let totalDistance = 0;
 
+  const swimStep = (segment: Segment): WorkoutStep => ({
+    type: "ExecutableStepDTO",
+    stepOrder: stepOrder++,
+    description: segment.description,
+    stepType: mainStepType,
+    endCondition: distanceEndCondition,
+    endConditionValue: segment.distance,
+    ...(isKick(segment.description)
+      ? { strokeType: drillStrokeType, drillType: kickDrillType }
+      : { strokeType: freeStrokeType }),
+  });
+  const timedRest = (seconds: number): WorkoutStep => ({
+    type: "ExecutableStepDTO",
+    stepOrder: stepOrder++,
+    stepType: restStepType,
+    endCondition: restEndCondition,
+    endConditionValue: seconds,
+  });
+  const lapRest = (): WorkoutStep => ({
+    type: "ExecutableStepDTO",
+    stepOrder: stepOrder++,
+    stepType: restStepType,
+    endCondition: lapEndCondition,
+    endConditionValue: 200,
+  });
+
   for (const item of items) {
     if (item.kind === "rest") {
-      workoutSteps.push({
-        type: "ExecutableStepDTO",
-        stepOrder: stepOrder++,
-        stepType: restStepType,
-        endCondition: restEndCondition,
-        endConditionValue: item.seconds,
-      });
+      // `1' descanso` right after a set replaces that set's rest rather than
+      // adding a second one; after a LAP rest it is already covered
+      const prev = workoutSteps[workoutSteps.length - 1];
+      if (prev?.stepType === restStepType && prev.endCondition === restEndCondition) {
+        prev.endConditionValue = item.seconds;
+      } else if (prev?.endCondition !== lapEndCondition) {
+        workoutSteps.push(timedRest(item.seconds));
+      }
       continue;
     }
 
-    const groupOrder = stepOrder++;
-    const repeatSteps: WorkoutStep[] = [];
-    for (const segment of item.segments) {
-      totalDistance += segment.distance * item.reps;
-      repeatSteps.push({
-        type: "ExecutableStepDTO",
-        stepOrder: stepOrder++,
-        description: segment.description,
-        stepType: mainStepType,
-        endCondition: distanceEndCondition,
-        endConditionValue: segment.distance,
-        strokeType: freeStrokeType,
+    const segments = item.segments;
+    const finalRest = segments[segments.length - 1].rest;
+    totalDistance += segments.reduce((sum, segment) => sum + segment.distance, 0) * item.reps;
+
+    if (item.reps === 1) {
+      segments.forEach((segment, index) => {
+        workoutSteps.push(swimStep(segment));
+        if (segment.rest > 0 && index < segments.length - 1) {
+          workoutSteps.push(timedRest(segment.rest));
+        }
       });
-      if (segment.rest > 0) {
-        repeatSteps.push({
-          type: "ExecutableStepDTO",
-          stepOrder: stepOrder++,
-          stepType: restStepType,
-          endCondition: restEndCondition,
-          endConditionValue: segment.rest,
-        });
+    } else {
+      const groupOrder = stepOrder++;
+      const repeatSteps: WorkoutStep[] = [];
+      for (const segment of segments) {
+        repeatSteps.push(swimStep(segment));
+        if (segment.rest > 0) {
+          repeatSteps.push(timedRest(segment.rest));
+        }
       }
+      workoutSteps.push({
+        ...loopStepBase,
+        stepOrder: groupOrder,
+        numberOfIterations: item.reps,
+        skipLastRestStep: true,
+        workoutSteps: repeatSteps,
+      });
     }
 
-    workoutSteps.push({
-      ...loopStepBase,
-      stepOrder: groupOrder,
-      numberOfIterations: item.reps,
-      workoutSteps: repeatSteps,
-    });
-
-    // add lap button press
-    workoutSteps.push({
-      stepOrder: stepOrder++,
-      stepType: restStepType,
-      type: "ExecutableStepDTO",
-      endCondition: lapEndCondition,
-      endConditionValue: 200,
-    });
+    if (options.lapRest) {
+      workoutSteps.push(lapRest());
+    } else if (finalRest > 0) {
+      workoutSteps.push(timedRest(finalRest));
+    }
   }
 
   return {
