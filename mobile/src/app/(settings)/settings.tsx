@@ -1,4 +1,4 @@
-import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, StyleSheet, Switch, Text, View } from "react-native";
 
 import { useAccounts } from "@/components/accounts-context";
 
@@ -80,6 +80,18 @@ export default function Settings() {
             );
           })}
         </View>
+      </View>
+
+      <Text style={styles.sectionTitle}>Relógio</Text>
+      <View style={styles.row}>
+        <View style={styles.rowInfo}>
+          <Text style={styles.rowName}>Aguardar LAP entre séries</Text>
+          <Text style={styles.rowStatus}>
+            Ao fim de cada série, o descanso só termina quando você apertar LAP. Desligado, o
+            relógio conta o descanso e segue sozinho — um LAP a mais não pula a próxima série.
+          </Text>
+        </View>
+        <Switch value={accounts.lapRest} onValueChange={accounts.setLapRest} />
       </View>
 
       <Text style={styles.sectionTitle}>Sobre</Text>

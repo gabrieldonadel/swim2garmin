@@ -11,6 +11,7 @@ export default function Popup() {
   const [isLoading, setIsLoading] = useState(false);
   const [showVisualizer, setShowVisualizer] = useState(false);
   const [trainingText, setTrainingText] = useState("");
+  const [lapRest, setLapRest] = useState(false);
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -71,7 +72,7 @@ export default function Popup() {
     setStatus({ message: "", type: "" });
 
     try {
-      const parsedTrainingData = parseTrainingText(trainingText);
+      const parsedTrainingData = parseTrainingText(trainingText, { lapRest });
 
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const tab = tabs[0];
@@ -167,6 +168,16 @@ export default function Popup() {
         onChange={(e) => setTrainingText(e.target.value)}
       />
 
+      <label className="w-full flex items-center gap-2 mb-4 text-sm text-gray-700">
+        <input
+          type="checkbox"
+          checked={lapRest}
+          disabled={isLoading}
+          onChange={(e) => setLapRest(e.target.checked)}
+        />
+        Wait for LAP between sets (instead of a timed rest)
+      </label>
+
       {/* Action Buttons */}
       <div className="w-full flex gap-2">
         <button
@@ -197,7 +208,7 @@ export default function Popup() {
 
       {status.message && <div className={statusClasses}>{status.message}</div>}
       {/* Visualizer */}
-      {showVisualizer && <TrainingVisualizer trainingText={trainingText} />}
+      {showVisualizer && <TrainingVisualizer trainingText={trainingText} lapRest={lapRest} />}
     </div>
   );
 }
