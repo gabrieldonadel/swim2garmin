@@ -12,7 +12,7 @@ import {
   type TrainingPeaksStatus,
   type WeekResult,
 } from "@/components/trainingpeaks-connect";
-import { usePoolLength, type PoolLength } from "@/lib/use-pool-length";
+import { useSettings, type PoolLength } from "@/lib/use-settings";
 
 interface Accounts {
   garminStatus: GarminStatus;
@@ -26,6 +26,8 @@ interface Accounts {
   openGarminWorkout(workoutId: number): void;
   poolLength: PoolLength;
   setPoolLength(value: PoolLength): void;
+  lapRest: boolean;
+  setLapRest(value: boolean): void;
 }
 
 const AccountsContext = createContext<Accounts | null>(null);
@@ -39,7 +41,7 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
   const [tpStatus, setTpStatus] = useState<TrainingPeaksStatus>("loading");
   const onResult = useRef<(r: SendResult) => void>(() => {});
   const onWeek = useRef<(r: WeekResult) => void>(() => {});
-  const { poolLength, setPoolLength } = usePoolLength();
+  const { poolLength, setPoolLength, lapRest, setLapRest } = useSettings();
 
   const value: Accounts = {
     garminStatus,
@@ -70,6 +72,8 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
     },
     poolLength,
     setPoolLength,
+    lapRest,
+    setLapRest,
   };
 
   return (
