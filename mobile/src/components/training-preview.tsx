@@ -4,9 +4,7 @@ import { lapEndCondition } from "@/lib/parser";
 import type { TrainingData, WorkoutStep } from "@/lib/types";
 
 export function TrainingPreview({ data }: { data: TrainingData }) {
-  const steps = data.workoutSegments[0].workoutSteps.filter(
-    (step) => step.endCondition.conditionTypeKey !== lapEndCondition.conditionTypeKey
-  );
+  const steps = data.workoutSegments[0].workoutSteps;
 
   return (
     <View style={styles.container}>
@@ -28,6 +26,9 @@ function Step({ step }: { step: WorkoutStep }) {
         </View>
       </View>
     );
+  }
+  if (step.endCondition.conditionTypeKey === lapEndCondition.conditionTypeKey) {
+    return <Text style={styles.rest}>descanso até apertar LAP</Text>;
   }
   if (step.stepType?.stepTypeKey === "rest") {
     return <Text style={styles.rest}>descanso {step.endConditionValue}s</Text>;
